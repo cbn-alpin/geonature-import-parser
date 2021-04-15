@@ -219,7 +219,7 @@ def fix_altitudes_errors(row, reader, reports):
     return row
 
 def replace_code_dataset(row, datasets, reader, reports):
-    if 'code_dataset' in row.keys() and row['code_dataset'] != None:
+    if 'code_dataset' in row.keys() and not is_empty_or_null(row['code_dataset']):
         code = row['code_dataset']
         try:
             if datasets[code]:
@@ -241,14 +241,14 @@ def replace_code_dataset(row, datasets, reader, reports):
     return row
 
 def replace_code_module(row, modules):
-    if 'code_module' in row.keys() and row['code_module'] != None:
+    if 'code_module' in row.keys() and not is_empty_or_null(row['code_module']):
         code = row['code_module']
         if modules[code]:
             row['code_module'] = modules[code]
     return row
 
 def replace_code_source(row, sources, reader, reports):
-    if 'code_source' in row.keys() and row['code_source'] != None:
+    if 'code_source' in row.keys() and not is_empty_or_null(row['code_source']):
         code = row['code_source']
         try:
             if sources[code]:
@@ -297,7 +297,7 @@ def replace_code_nomenclature(row, nomenclatures, reader, reports):
     return row
 
 def replace_code_organism(row, organisms, reader, reports):
-    if 'code_organism' in row.keys() and row['code_organism'] != None:
+    if 'code_organism' in row.keys() and not is_empty_or_null(row['code_organism']):
         code = row['code_organism']
         try:
             if organisms[code]:
@@ -319,14 +319,14 @@ def replace_code_organism(row, organisms, reader, reports):
     return row
 
 def replace_code_acquisition_framework(row, acquisition_frameworks):
-    if 'code_acquisition_framework' in row.keys() and row['code_acquisition_framework'] != None:
+    if 'code_acquisition_framework' in row and not is_empty_or_null(row['code_acquisition_framework']):
         code = row['code_acquisition_framework']
         if acquisition_frameworks[code]:
             row['code_acquisition_framework'] = acquisition_frameworks[code]
     return row
 
 def replace_code_digitiser(row, users, reader, reports):
-    if 'code_digitiser' in row and row['code_digitiser'] != None:
+    if 'code_digitiser' in row and not is_empty_or_null(row['code_digitiser']):
         code = row['code_digitiser']
         try:
             if users[code]:
