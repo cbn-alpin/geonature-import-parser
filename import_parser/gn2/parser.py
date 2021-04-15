@@ -98,7 +98,7 @@ def get_report_field_value(row, reader):
 
 def check_sciname_code(row, scinames_codes, reader, reports):
     exists = True
-    if row['cd_nom'] != None:
+    if row['cd_nom'] != None and row['cd_nom'] != Config.get('null_value_string'):
         exists = (str(row['cd_nom']) in scinames_codes)
     if not exists:
         reports['lines_removed_total'] += 1
@@ -172,6 +172,51 @@ def fix_altitude_max(row, reader, reports):
             row['altitude_max'] = alt_fixed
     return row
 
+def has_altitudes(row, reader, reports):
+    is_ok = True
+    if row['altitude_min'] == None or row['altitude_min'] == Config.get('null_value_string'):
+        is_ok = False
+    if row['altitude_max'] == None or row['altitude_max'] == Config.get('null_value_string'):
+        is_ok = False
+    return is_ok
+
+def fix_inverted_altitudes(row, reader, reports):
+    if has_altitudes(row, reader, reports) and int(row['altitude_max']) < int(row['altitude_min']):
+        report_value = get_report_field_value(row, reader)
+        reports['altitude_inverted_lines'].append(report_value)
+        msg = f"WARNING ({report_value}): altitudes min ({row['altitude_min']}) - max ({row['altitude_max']}) inverted !"
+        print_error(msg)
+        tmp_alt_min = row['altitude_min']
+        row['altitude_min'] = row['altitude_max']
+        row['altitude_max'] = tmp_alt_min
+    return row
+
+def fix_altitudes_errors(row, reader, reports):
+    is_ok = False
+    if (
+        has_altitudes(row, reader, reports) == False
+        or (
+            has_altitudes(row, reader, reports) == True and (
+                int(row['altitude_max']) >= int(row['altitude_min'])
+                and int(row['altitude_min']) >= 0 and int(row['altitude_min']) <= 4696 # Mont Blanc
+                and int(row['altitude_max']) >= 0 and int(row['altitude_max']) <= 4696 # Mont Blanc
+            )
+        )
+    ):
+        is_ok = True
+    if not is_ok:
+        report_value = get_report_field_value(row, reader)
+        msg = [
+                f"WARNING ({report_value}): altitude error !",
+                f"\Altitude min: {row['altitude_min']}",
+                f"\Altitude max: {row['altitude_max']}",
+                f"\tSet to null value string !"
+            ]
+        print_error('\n'.join(msg))
+        reports['altitude_errors_lines'].append(report_value)
+        row['altitude_min'] = Config.get('null_value_string')
+        row['altitude_max'] = Config.get('null_value_string')
+    return row
 
 def replace_code_dataset(row, datasets, reader, reports):
     if 'code_dataset' in row.keys() and row['code_dataset'] != None:
@@ -278,4 +323,26 @@ def replace_code_acquisition_framework(row, acquisition_frameworks):
         code = row['code_acquisition_framework']
         if acquisition_frameworks[code]:
             row['code_acquisition_framework'] = acquisition_frameworks[code]
+    return row
+
+def replace_code_digitiser(row, users, reader, reports):
+    if 'code_digitiser' in row and row['code_digitiser'] != None:
+        code = row['code_digitiser']
+        try:
+            if users[code]:
+                row['code_digitiser'] = users[code]
+        except KeyError as e:
+            report_value = get_report_field_value(row, reader)
+            msg = [
+                f"WARNING ({report_value}): digitiser (=> user) code missing !",
+                f"\Digitiser code: {code}",
+                f"\tSet to null value string !"
+            ]
+            print_error('\n'.join(msg))
+            (
+                reports['digitiser_code_unknown_lines']
+                .setdefault(str(code), [])
+                .append(report_value)
+            )
+            row['code_digitiser'] = Config.get('null_value_string')
     return row

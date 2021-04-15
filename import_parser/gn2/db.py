@@ -132,3 +132,14 @@ class GnDatabase:
         for record in records:
             acquisition_frameworks[record['code']] = record['id']
         return acquisition_frameworks
+
+    def get_all_users(self):
+        self.db_cursor.execute(f"""
+            SELECT identifiant AS code, id_role AS id
+            FROM utilisateurs.t_roles
+        """)
+        records = self.db_cursor.fetchall()
+        users = {}
+        for record in records:
+            users[str(record['code'])] = record['id']
+        return users

@@ -104,6 +104,7 @@ def parse_file(filename, import_type, actions_config_file):
         sources = db.get_all_sources()
         nomenclatures = db.get_all_nomenclatures()
         scinames_codes = db.get_all_scinames_codes()
+        users = db.get_all_users()
     elif import_type == 'u':
         organisms = db.get_all_organisms()
     elif import_type == 'af':
@@ -127,6 +128,9 @@ def parse_file(filename, import_type, actions_config_file):
             'dataset_code_unknown_lines': {},
             'organism_code_unknown_lines': {},
             'nomenclature_code_unknown_lines': {},
+            'digitiser_code_unknown_lines': {},
+            'altitude_inverted_lines': [],
+            'altitude_errors_lines': [],
             'altitude_min_fixed_lines': [],
             'altitude_max_fixed_lines': [],
         }
@@ -174,10 +178,15 @@ def parse_file(filename, import_type, actions_config_file):
                                 write_row = False
                                 print_error(f"Line {reader.line_num} removed, date max not greater than date min !")
 
+                            # Fix altitudes
                             if write_row != False:
-                                # Fix altitudes
                                 row = fix_altitude_min(row, reader, reports)
                                 row = fix_altitude_max(row, reader, reports)
+                                row = fix_inverted_altitudes(row, reader, reports)
+                                row = fix_altitudes_errors(row, reader, reports)
+
+                            # Replace codes
+                            if write_row != False:
                                 # Replace Dataset Code
                                 row = replace_code_dataset(row, datasets, reader, reports)
                                 # Replace Module Code
@@ -186,6 +195,8 @@ def parse_file(filename, import_type, actions_config_file):
                                 row = replace_code_source(row, sources, reader, reports)
                                 # Replace Nomenclatures Codes
                                 row = replace_code_nomenclature(row, nomenclatures, reader, reports)
+                                # Replace Digitiser Code
+                                row = replace_code_digitiser(row, users, reader, reports)
                         elif import_type == 'u':
                             # Replace Organism Code
                             row = replace_code_organism(row, organisms, reader, reports)
@@ -266,6 +277,15 @@ def parse_file(filename, import_type, actions_config_file):
         print_info('\n'.join(lines_to_print))
         print_info('-'*72)
 
+        total = 0
+        lines_to_print = []
+        for digitiser_code, lines in reports['digitiser_code_unknown_lines'].items():
+            lines_to_print.append(f"       {digitiser_code}: {', '.join(lines)}")
+            total += len(lines)
+        print_info(f'   List of {total} lines with unknown digitiser codes:')
+        print_info('\n'.join(lines_to_print))
+        print_info('-'*72)
+
         total = len(reports['altitude_min_fixed_lines'])
         print_info(f'   List of {total} lines with altitude min fixed:')
         print_info(f"       {', '.join(reports['altitude_min_fixed_lines'])}")
@@ -276,6 +296,15 @@ def parse_file(filename, import_type, actions_config_file):
         print_info(f"       {', '.join(reports['altitude_max_fixed_lines'])}")
         print_info('-'*72)
 
+        total = len(reports['altitude_inverted_lines'])
+        print_info(f'   List of {total} lines with altitudes inverted fixed:')
+        print_info(f"       {', '.join(reports['altitude_inverted_lines'])}")
+        print_info('-'*72)
+
+        total = len(reports['altitude_errors_lines'])
+        print_info(f'   List of {total} lines with altitudes errors:')
+        print_info(f"       {', '.join(reports['altitude_errors_lines'])}")
+        print_info('-'*72)
 
     # Script time elapsed
     time_elapsed = time.time() - start_time
