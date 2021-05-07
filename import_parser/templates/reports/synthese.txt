@@ -1,0 +1,10 @@
+Total lines removed: {{ reports['lines_removed_total'] }}
+-------------------------------------------------------------------------
+List of removed lines with unknown scinames codes:
+{% set total = 0 -%}
+{% for sciname, lines in reports['sciname_removed_lines'].items() -%}
+    {% set total = total + len(lines) -%}
+    {{ sciname }}: {{ lines | join(', ') }}
+{% endfor %}
+    Total: {{ total }}
+-------------------------------------------------------------------------

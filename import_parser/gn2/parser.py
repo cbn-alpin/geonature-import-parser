@@ -80,11 +80,38 @@ def insert_values_to_columns(row):
                     row[field] = value
     return row
 
+def force_protected_char(row):
+    fieldnames = list(row.keys())
+    for field in fieldnames:
+        value = row[field]
+        value = re.sub(r'\r\n', '\\r\\n', value)
+        value = re.sub(r'\n', '\\n', value)
+        value = re.sub(r'\r', '\\r', value)
+        value = re.sub(r'\t', '\\t', value)
+        row[field] = value
+    return row
+
 def add_uuid_obs(row):
     if Config.get('actions.add_uuid_obs'):
         if not is_uuid(row['unique_id_sinp']):
             row['unique_id_sinp'] = uuid.uuid4()
     return row
+
+def replace_empty_value(row):
+    # Set NULL instead of empty value for optional fields with UUID, INT, JSON or DATE type.
+    fields = [
+        'unique_id_sinp', 'unique_id_sinp_grp', 'cd_nom', 'cd_hab', 'count_min', 'count_max',
+        'altitude_min', 'altitude_max', 'depth_min', 'depth_max', 'precision',
+        'validation_date', 'determination_date', 'meta_create_date', 'meta_update_date',
+        'additional_data',
+    ]
+    for field_name in fields:
+        if is_empty_field(field_name, row):
+            row[field_name] = Config.get('null_value_string')
+    return row
+
+def is_empty_field(field_name, row):
+    return True if field_name in row and row[field_name] == '' else False
 
 def get_report_field_value(row, reader):
     value = str(reader.line_num)
@@ -174,9 +201,7 @@ def fix_altitude_max(row, reader, reports):
 
 def has_altitudes(row, reader, reports):
     is_ok = True
-    if row['altitude_min'] == None or row['altitude_min'] == Config.get('null_value_string'):
-        is_ok = False
-    if row['altitude_max'] == None or row['altitude_max'] == Config.get('null_value_string'):
+    if is_empty_or_null(row['altitude_min']) or is_empty_or_null(row['altitude_max']):
         is_ok = False
     return is_ok
 

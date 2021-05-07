@@ -40,8 +40,13 @@ class GnDatabase:
         print(records)
 
     def get_all_datasets(self):
+        if Config.has('fk.datasets') and Config.get('fk.datasets') == 'UUID':
+            code_field = 'unique_dataset_id'
+        else :
+            code_field = 'dataset_shortname'
+
         self.db_cursor.execute(f"""
-            SELECT dataset_shortname AS code, id_dataset AS id
+            SELECT {code_field} AS code, id_dataset AS id
             FROM gn_meta.t_datasets
         """)
         records = self.db_cursor.fetchall()
@@ -104,8 +109,13 @@ class GnDatabase:
         return codes
 
     def get_all_organisms(self):
+        if Config.has("fk.organisms") and Config.get("fk.organisms") == "UUID":
+            code_field = "uuid_organisme"
+        else :
+            code_field = "nom_organisme"
+
         self.db_cursor.execute(f"""
-            SELECT nom_organisme AS code, id_organisme AS id
+            SELECT {code_field} AS code, id_organisme AS id
             FROM utilisateurs.bib_organismes
         """)
         records = self.db_cursor.fetchall()
@@ -123,8 +133,13 @@ class GnDatabase:
         return self.db_cursor.fetchone() is not None
 
     def get_all_acquisition_frameworks(self):
+        if Config.has('fk.af') and Config.get('fk.af') == 'UUID':
+            code_field = 'unique_acquisition_framework_id'
+        else :
+            code_field = 'acquisition_framework_name'
+
         self.db_cursor.execute(f"""
-            SELECT acquisition_framework_name AS code, id_acquisition_framework AS id
+            SELECT {code_field} AS code, id_acquisition_framework AS id
             FROM gn_meta.t_acquisition_frameworks
         """)
         records = self.db_cursor.fetchall()
@@ -134,8 +149,13 @@ class GnDatabase:
         return acquisition_frameworks
 
     def get_all_users(self):
+        if Config.has('fk.users') and Config.get('fk.users') == 'UUID':
+            code_field = 'uuid_role'
+        else :
+            code_field = 'identifiant'
+
         self.db_cursor.execute(f"""
-            SELECT identifiant AS code, id_role AS id
+            SELECT {code_field} AS code, id_role AS id
             FROM utilisateurs.t_roles
         """)
         records = self.db_cursor.fetchall()

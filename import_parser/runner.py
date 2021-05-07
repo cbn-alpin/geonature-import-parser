@@ -74,18 +74,44 @@ def parse_file(filename, import_type, actions_config_file):
     load_actions_config_file(actions_config_file)
     load_nomenclatures()
 
+    reader_dialect = Config.get('csv.reader.dialect') if Config.has('csv.reader.dialect') else 'tsv'
+    writer_dialect = Config.get('csv.writer.dialect') if Config.has('csv.writer.dialect') else 'tsv'
+
     click.echo('Source filename:' + filename_src)
     click.echo('Destination filename:' + filename_dest)
     click.echo('Type:' + import_type)
     click.echo('Remove columns ? ' + str(Config.get('actions.remove_columns')))
     click.echo('Columns to remove: ' + ', '.join(Config.get('actions.remove_columns.params')))
+    click.echo(f'CSV Reader dialect: {reader_dialect}')
+    click.echo(f'CSV Writer dialect: {writer_dialect}')
 
     csv.register_dialect(
-        'sql_copy',
-        delimiter='\t',
-        quotechar='',
+        'ssv',
+        delimiter=';',
+        quotechar='"',
+        doublequote=True,
+        quoting=csv.QUOTE_ALL,
         escapechar='',
-        quoting=csv.QUOTE_NONE,
+        lineterminator="\r\n"
+    )
+    csv.register_dialect(
+        'ssv-minimal',
+        delimiter=';',
+        quotechar='"',
+        doublequote=True,
+        quoting=csv.QUOTE_MINIMAL,
+        escapechar='',
+        lineterminator="\n"
+    )
+    csv.register_dialect(
+        'tsv',
+        delimiter='\t',
+        quotechar='"',
+        doublequote=True,
+        quoting=csv.QUOTE_MINIMAL,
+        #quoting=csv.QUOTE_NONE,
+        #escapechar='\\',
+        escapechar='',
         lineterminator="\n"
     )
 
@@ -135,11 +161,11 @@ def parse_file(filename, import_type, actions_config_file):
             'altitude_max_fixed_lines': [],
         }
 
-        reader = csv.DictReader(f_src, dialect='sql_copy')
+        reader = csv.DictReader(f_src, dialect=reader_dialect)
         with open(filename_dest, 'w', newline='', encoding='utf-8') as f_dest:
             fieldnames = remove_headers(reader.fieldnames)
             fieldnames = add_headers(fieldnames)
-            writer = csv.DictWriter(f_dest, dialect='sql_copy', fieldnames=fieldnames)
+            writer = csv.DictWriter(f_dest, dialect=writer_dialect, fieldnames=fieldnames)
             writer.writeheader()
 
             # TODO: see why progressbar don't work !
@@ -161,9 +187,15 @@ def parse_file(filename, import_type, actions_config_file):
                         # Insert value in colums
                         row = insert_values_to_columns(row)
 
+                        # Maintain protected char
+                        row = force_protected_char(row)
+
                         if import_type == 's' :
                             # Add observation UUID
                             row = add_uuid_obs(row)
+
+                            # Replace empty value in specific columns by NULL
+                            row = replace_empty_value(row)
 
                             # Check Sciname code
                             if check_sciname_code(row, scinames_codes, reader, reports) == False:
@@ -228,6 +260,19 @@ def parse_file(filename, import_type, actions_config_file):
         print_info('\n'.join(lines_to_print))
         print_info('-'*72)
     elif import_type == 's' :
+        from jinja2 import Environment, FileSystemLoader
+        current_path = os.path.realpath(os.path.dirname(__file__))
+        tpl_path = f'{current_path}/templates'
+        print(tpl_path)
+        file_loader = FileSystemLoader(searchpath=tpl_path)
+        env = Environment(loader=file_loader)
+        template = env.get_template('reports/synthese.txt')
+        report_output = template.render(reports=reports)
+        print(report_output)
+        # to save the results
+        with open('synthese.report.txt', 'w') as fh:
+            fh.write(report_output)
+
         print_msg(f"Total lines removed: {reports['lines_removed_total']: }")
         print_info('-'*72)
 
@@ -251,20 +296,7 @@ def parse_file(filename, import_type, actions_config_file):
         print_info('-'*72)
 
         total = 0
-        lines_to_print = []
-        for dataset_code, lines in reports['dataset_code_unknown_lines'].items():
-            lines_to_print.append(f"       {dataset_code}: {', '.join(lines)}")
-            total += len(lines)
-        print_info(f'   List of {total} lines with unknown dataset codes:')
-        print_info('\n'.join(lines_to_print))
-        print_info('-'*72)
-
-        total = 0
-        lines_to_print = []
-        for type_and_code, lines in reports['nomenclature_code_unknown_lines'].items():
-            lines_to_print.append(f"       {type_and_code}: {', '.join(lines)}")
-            total += len(lines)
-        print_info(f'   List of {total} lines with unknown nomenclature codes:')
+        lines_to_print = []cli use jinjaal} lines with unknown nomenclature codes:')
         print_info('\n'.join(lines_to_print))
         print_info('-'*72)
 
