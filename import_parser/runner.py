@@ -3,9 +3,11 @@ import sys
 import csv
 import time
 import datetime
-
+import json
 
 import click
+from jinja2 import Environment, FileSystemLoader
+
 
 # Define OS Environment variables
 root_dir = os.path.realpath(f'{os.path.dirname(os.path.abspath(__file__))}/../../')
@@ -49,7 +51,14 @@ from gn2.parser import *
     default=f'{config_dir}/actions.default.ini',
     help='Config file with actions to execute on CSV.',
 )
-def parse_file(filename, import_type, actions_config_file):
+@click.option(
+    '-r',
+    '--report',
+    'report_dir',
+    default=False,
+    help='Directory where the report file is stored.',
+)
+def parse_file(filename, import_type, actions_config_file, report_dir):
     """
     GeoNature 2 Import Parser
 
@@ -82,6 +91,10 @@ def parse_file(filename, import_type, actions_config_file):
     click.echo('Type:' + import_type)
     click.echo('Remove columns ? ' + str(Config.get('actions.remove_columns')))
     click.echo('Columns to remove: ' + ', '.join(Config.get('actions.remove_columns.params')))
+    click.echo('Add columns ? ' + str(Config.get('actions.add_columns')))
+    click.echo('Columns to add: ' + json.dumps(Config.get('actions.add_columns.params'), indent=4, sort_keys=True, default=str))
+    click.echo('Set columns values ? ' + str(Config.get('actions.set_values')))
+    click.echo('Columns to set values: ' + json.dumps(Config.get('actions.set_values.params'), indent=4, sort_keys=True, default=str))
     click.echo(f'CSV Reader dialect: {reader_dialect}')
     click.echo(f'CSV Writer dialect: {writer_dialect}')
 
@@ -249,100 +262,29 @@ def parse_file(filename, import_type, actions_config_file):
                         pbar.update(1)
                 except csv.Error as e:
                     sys.exit(f'Error in file {filename}, line {reader.line_num}: {e}')
-    # Report
-    if import_type == 'u' :
-        total = 0
-        lines_to_print = []
-        for code, lines in reports['organism_code_unknown_lines'].items():
-            lines_to_print.append(f"       {code}: {', '.join(lines)}")
-            total += len(lines)
-        print_info(f'   List of {total} lines with unknown organism codes:')
-        print_info('\n'.join(lines_to_print))
-        print_info('-'*72)
-    elif import_type == 's' :
-        from jinja2 import Environment, FileSystemLoader
-        current_path = os.path.realpath(os.path.dirname(__file__))
-        tpl_path = f'{current_path}/templates'
-        print(tpl_path)
-        file_loader = FileSystemLoader(searchpath=tpl_path)
-        env = Environment(loader=file_loader)
-        template = env.get_template('reports/synthese.txt')
-        report_output = template.render(reports=reports)
-        print(report_output)
-        # to save the results
-        with open('synthese.report.txt', 'w') as fh:
-            fh.write(report_output)
-
-        print_msg(f"Total lines removed: {reports['lines_removed_total']: }")
-        print_info('-'*72)
-
-        total = 0
-        lines_to_print = []
-        for sciname, lines in reports['sciname_removed_lines'].items():
-            lines_to_print.append(f"       {sciname}: {', '.join(lines)}")
-            total += len(lines)
-        print_info(f'   List of {total} removed lines with unknown scinames codes:')
-        print_info('\n'.join(lines_to_print))
-        print_info('-'*72)
-
-        total = len(reports['date_missing_removed_lines'])
-        print_info(f'   List of {total} removed lines with missing date min or max:')
-        print_info(f"       {', '.join(reports['date_missing_removed_lines'])}")
-        print_info('-'*72)
-
-        total = len(reports['date_max_removed_lines'])
-        print_info(f'   List of {total} removed lines with date max not greater than date min:')
-        print_info(f"       {', '.join(reports['date_max_removed_lines'])}")
-        print_info('-'*72)
-
-        total = 0
-        lines_to_print = []cli use jinjaal} lines with unknown nomenclature codes:')
-        print_info('\n'.join(lines_to_print))
-        print_info('-'*72)
-
-        total = 0
-        lines_to_print = []
-        for code, lines in reports['source_code_unknown_lines'].items():
-            lines_to_print.append(f"       {code}: {', '.join(lines)}")
-            total += len(lines)
-        print_info(f'   List of {total} lines with unknown source codes:')
-        print_info('\n'.join(lines_to_print))
-        print_info('-'*72)
-
-        total = 0
-        lines_to_print = []
-        for digitiser_code, lines in reports['digitiser_code_unknown_lines'].items():
-            lines_to_print.append(f"       {digitiser_code}: {', '.join(lines)}")
-            total += len(lines)
-        print_info(f'   List of {total} lines with unknown digitiser codes:')
-        print_info('\n'.join(lines_to_print))
-        print_info('-'*72)
-
-        total = len(reports['altitude_min_fixed_lines'])
-        print_info(f'   List of {total} lines with altitude min fixed:')
-        print_info(f"       {', '.join(reports['altitude_min_fixed_lines'])}")
-        print_info('-'*72)
-
-        total = len(reports['altitude_max_fixed_lines'])
-        print_info(f'   List of {total} lines with altitude max fixed:')
-        print_info(f"       {', '.join(reports['altitude_max_fixed_lines'])}")
-        print_info('-'*72)
-
-        total = len(reports['altitude_inverted_lines'])
-        print_info(f'   List of {total} lines with altitudes inverted fixed:')
-        print_info(f"       {', '.join(reports['altitude_inverted_lines'])}")
-        print_info('-'*72)
-
-        total = len(reports['altitude_errors_lines'])
-        print_info(f'   List of {total} lines with altitudes errors:')
-        print_info(f"       {', '.join(reports['altitude_errors_lines'])}")
-        print_info('-'*72)
 
     # Script time elapsed
     time_elapsed = time.time() - start_time
     time_elapsed_for_human = str(datetime.timedelta(seconds=time_elapsed))
-    print_msg('Script time')
-    print_info(f'   Elapsed: {time_elapsed_for_human}')
+
+    # Build and print report
+    app_path = os.environ['IMPORT_PARSER.PATHES.APP']
+    tpl_path = f'{app_path}/import_parser/templates'
+    file_loader = FileSystemLoader(searchpath=tpl_path)
+    env = Environment(loader=file_loader)
+    action_type = Config.get('actions.type').lower()
+    template = env.get_template(f'reports/{action_type}.txt.j2')
+    report_output = template.render(reports=reports, elapsed_time=time_elapsed_for_human)
+    print(report_output)
+
+    # Save the report
+    if report_dir:
+        if not os.path.exists(report_dir):
+            os.makedirs(report_dir)
+        current_date = datetime.date.today().isoformat()
+        report_path = f'{report_dir}/{current_date}_{action_type}.report.txt'
+        with open(report_path, 'w') as fh:
+            fh.write(report_output)
 
 def set_actions_type(abbr_type):
     types = {

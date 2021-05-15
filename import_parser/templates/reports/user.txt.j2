@@ -1,10 +1,12 @@
-Total lines removed: {{ reports['lines_removed_total'] }}
+USER CSV file report
 -------------------------------------------------------------------------
-List of removed lines with unknown scinames codes:
+List of lines with unknown organism codes:
 {% set total = 0 -%}
-{% for sciname, lines in reports['sciname_removed_lines'].items() -%}
+{% for code, lines in reports['organism_code_unknown_lines'].items() -%}
     {% set total = total + len(lines) -%}
-    {{ sciname }}: {{ lines | join(', ') }}
+    {{ code }}: {{ lines | join(', ') }}
 {% endfor %}
     Total: {{ total }}
 -------------------------------------------------------------------------
+Script time:
+    Elapsed: {{ elapsed_time }}

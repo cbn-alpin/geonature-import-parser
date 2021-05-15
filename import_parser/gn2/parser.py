@@ -3,6 +3,7 @@ import sys
 import re
 import uuid
 import configparser
+from collections import OrderedDict
 
 from helpers.config import Config
 from helpers.helpers import (
@@ -36,12 +37,32 @@ def remove_headers(fieldnames):
                     output.remove(field)
     return output
 
-# Add new row entries if necessary
+# Add new header entries if necessary
 def add_headers(fieldnames):
-    output = fieldnames.copy()
-    if Config.get('actions.add_uuid_obs') and 'unique_id_sinp' not in fieldnames:
-        output.insert(0, 'unique_id_sinp')
-    return output
+    if Config.get('actions.add_columns'):
+        new_fieldnames = []
+        fields_patterns = get_add_columns_params()
+        for field in fieldnames:
+            inserted = False
+            for pattern, params in fields_patterns.items():
+                if re.match(rf'^{pattern}$', field):
+                    inserted = True
+                    pos = params['position']
+                    new_field = params['new_field']
+                    if pos == 'before':
+                        new_fieldnames.append(new_field)
+                        new_fieldnames.append(field)
+                    elif pos == 'after':
+                        new_fieldnames.append(field)
+                        new_fieldnames.append(new_field)
+                    else:
+                        print_error(f"Position value for actions.add_columns.params unknown in parser_action.ini: {pos}")
+                        exit(1)
+            if not inserted:
+                new_fieldnames.append(field)
+        return new_fieldnames
+    else:
+        return fieldnames.copy()
 
 # Remove row entries where fieldname match pattern
 def remove_columns(row, reader):
@@ -64,11 +85,47 @@ def remove_columns(row, reader):
                     print(row)
     return row
 
-# Add row entries if necessary
+# Add new columns if necessary
 def add_columns(row):
-    if Config.get('actions.add_uuid_obs') and 'unique_id_sinp' not in row:
-        row['unique_id_sinp'] = Config.get('null_value_string')
-    return row
+    if Config.get('actions.add_columns'):
+        fields_patterns = get_add_columns_params()
+        new_row = OrderedDict()
+        fieldnames = list(row.keys())
+        for field in fieldnames:
+            inserted = False
+            for pattern, params in fields_patterns.items():
+                if re.match(rf'^{pattern}$', field):
+                    inserted = True
+                    pos = params['position']
+                    new_field = params['new_field']
+                    new_value = params['value']
+                    if pos == 'before':
+                        new_row[new_field] = new_value
+                        new_row[field] = row[field]
+                    elif pos == 'after':
+                        new_row[field] = row[field]
+                        new_row[new_field] = new_value
+                    else:
+                        print_error(f"Position value for actions.add_columns.params unknown in parser_action.ini: {pos}")
+                        exit(1)
+            if not inserted:
+                new_row[field] = row[field]
+        return new_row
+    else:
+        return row
+
+def get_add_columns_params():
+    cols_to_add =  Config.get('actions.add_columns.params')
+    fields_patterns = {}
+    for new_field, params in cols_to_add.items():
+        pattern = params['field']
+        fields_patterns[pattern] = {
+            'new_field': new_field,
+            'position': params['position'],
+            'value': params['value'],
+        }
+    return fields_patterns
+
 
 def insert_values_to_columns(row):
     if Config.get('actions.set_values'):
@@ -301,7 +358,9 @@ def replace_code_nomenclature(row, nomenclatures, reader, reports):
         if field.startswith('code_nomenclature_'):
             nomenclature_type = columns_types[field]
             code = row[field]
-            if code != Config.get('null_value_string'):
+            if code == '':
+                row[field] = Config.get('null_value_string')
+            elif code != Config.get('null_value_string'):
                 try:
                     row[field] = nomenclatures[nomenclature_type][code]
                 except KeyError as e:
