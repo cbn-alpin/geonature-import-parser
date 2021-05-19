@@ -270,21 +270,23 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
     # Build and print report
     app_path = os.environ['IMPORT_PARSER.PATHES.APP']
     tpl_path = f'{app_path}/import_parser/templates'
-    file_loader = FileSystemLoader(searchpath=tpl_path)
-    env = Environment(loader=file_loader)
     action_type = Config.get('actions.type').lower()
-    template = env.get_template(f'reports/{action_type}.txt.j2')
-    report_output = template.render(reports=reports, elapsed_time=time_elapsed_for_human)
-    print(report_output)
+    tpl_file = f'reports/{action_type}.txt.j2'
+    if os.path.exists(f'{tpl_path}/{tpl_file}'):
+        file_loader = FileSystemLoader(searchpath=tpl_path)
+        env = Environment(loader=file_loader)
+        template = env.get_template(tpl_file)
+        report_output = template.render(reports=reports, elapsed_time=time_elapsed_for_human)
+        print(report_output)
 
-    # Save the report
-    if report_dir:
-        if not os.path.exists(report_dir):
-            os.makedirs(report_dir)
-        current_date = datetime.date.today().isoformat()
-        report_path = f'{report_dir}/{current_date}_{action_type}.report.txt'
-        with open(report_path, 'w') as fh:
-            fh.write(report_output)
+        # Save the report
+        if report_dir:
+            if not os.path.exists(report_dir):
+                os.makedirs(report_dir)
+            current_date = datetime.date.today().isoformat()
+            report_path = f'{report_dir}/{current_date}_{action_type}.report.txt'
+            with open(report_path, 'w') as fh:
+                fh.write(report_output)
 
 def set_actions_type(abbr_type):
     types = {
