@@ -62,17 +62,20 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
     """
     GeoNature 2 Import Parser
 
-    This script parse files containing Postregsql \copy data before integrate their in GeoNature 2 database.
-    To avoid to use integer identifiers in import files we use alphanumeric value for nomenclature, dataset,
-    organisms or users linked data.
+    This script parse files containing Postregsql \copy data before integrate
+    their in GeoNature 2 database.
+    To avoid to use integer identifiers in import files we use alphanumeric value
+    (code or uuid) for nomenclature, dataset,organisms or users linked data.
 
-    This script produce new files suffixed by '_rti' (ready to import) where all codes were replaced by integers
-    identifiers specific to a GeoNature 2 database.
+    This script produce new files suffixed by '_rti' (ready to import) where
+    all codes or uuid were replaced by integers identifiers specific to a
+    GeoNature 2 database.
 
     Each import files must follow a specific format describe in this SINP Wiki :
     https://wiki-sinp.cbn-alpin.fr/database/import-formats
 
-    Access to the GeoNature database must be configured in 'shared/config/settings.ini' file.
+    Access to the GeoNature database must be configured in
+    '../shared/config/settings.ini' file.
     """
     start_time = time.time()
 
