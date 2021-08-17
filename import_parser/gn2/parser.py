@@ -290,8 +290,8 @@ def fix_altitudes_errors(row, reader, reports):
         report_value = get_report_field_value(row, reader)
         msg = [
                 f"WARNING ({report_value}): altitude error !",
-                f"\Altitude min: {row['altitude_min']}",
-                f"\Altitude max: {row['altitude_max']}",
+                f"\tAltitude min: {row['altitude_min']}",
+                f"\tAltitude max: {row['altitude_max']}",
                 f"\tSet to null value string !"
             ]
         print_error('\n'.join(msg))
