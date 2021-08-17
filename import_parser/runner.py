@@ -171,6 +171,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
             'organism_code_unknown_lines': {},
             'nomenclature_code_unknown_lines': {},
             'digitiser_code_unknown_lines': {},
+            'af_code_unknown_lines': {},
             'altitude_inverted_lines': [],
             'altitude_errors_lines': [],
             'altitude_min_fixed_lines': [],
@@ -253,8 +254,9 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                             row = replace_code_nomenclature(row, nomenclatures, reader, reports)
                         elif import_type == 'd':
                             # Replace Nomenclatures Codes
+                            row = set_default_nomenclature_values(row)
                             row = replace_code_nomenclature(row, nomenclatures, reader, reports)
-                            row = replace_code_acquisition_framework(row, acquisition_frameworks)
+                            row = replace_code_acquisition_framework(row, acquisition_frameworks, reader, reports)
 
                         # Write in destination file
                         if write_row == True:

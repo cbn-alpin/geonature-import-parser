@@ -351,6 +351,16 @@ def replace_code_source(row, sources, reader, reports):
             row['code_source'] = Config.get('null_value_string')
     return row
 
+def set_default_nomenclature_values(row):
+    default_values = Config.getSection('NOMENCLATURES_DEFAULT_VALUE')
+    fieldnames = list(row.keys())
+    for field in fieldnames:
+        value = row[field]
+        if is_empty_or_null(value) and field in default_values:
+            row[field] = default_values[field]
+    return row
+
+
 def replace_code_nomenclature(row, nomenclatures, reader, reports):
     columns_types = Config.getSection('NOMENCLATURES')
     fieldnames = list(row.keys())
@@ -402,11 +412,26 @@ def replace_code_organism(row, organisms, reader, reports):
             row['code_organism'] = Config.get('null_value_string')
     return row
 
-def replace_code_acquisition_framework(row, acquisition_frameworks):
+def replace_code_acquisition_framework(row, acquisition_frameworks, reader, reports):
     if 'code_acquisition_framework' in row and not is_empty_or_null(row['code_acquisition_framework']):
         code = row['code_acquisition_framework']
-        if acquisition_frameworks[code]:
-            row['code_acquisition_framework'] = acquisition_frameworks[code]
+        try:
+            if acquisition_frameworks[code]:
+                row['code_acquisition_framework'] = acquisition_frameworks[code]
+        except KeyError as e:
+            report_value = get_report_field_value(row, reader)
+            msg = [
+                f"WARNING ({report_value}): acquisition framework code missing !",
+                f"\tAcquisition framework code: {code}",
+                f"\tSet to null value string !"
+            ]
+            print_error('\n'.join(msg))
+            (
+                reports['af_code_unknown_lines']
+                .setdefault(str(code), [])
+                .append(report_value)
+            )
+            row['code_acquisition_framework'] = Config.get('null_value_string')
     return row
 
 def replace_code_digitiser(row, users, reader, reports):
