@@ -58,6 +58,10 @@ List of lines with altitude max fixed:
     {{ reports['altitude_max_fixed_lines'] | join(', ') }}
     Total: {{ reports['altitude_max_fixed_lines'] | length }}
 -------------------------------------------------------------------------
+List of lines with negative altitudes fixed:
+    {{ reports['altitude_negative_lines'] | join(', ') }}
+    Total: {{ reports['altitude_negative_lines'] | length }}
+-------------------------------------------------------------------------
 List of lines with altitudes inverted fixed:
     {{ reports['altitude_inverted_lines'] | join(', ') }}
     Total: {{ reports['altitude_inverted_lines'] | length }}

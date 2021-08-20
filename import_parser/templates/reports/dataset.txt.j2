@@ -1,0 +1,12 @@
+DATASET CSV file report
+-------------------------------------------------------------------------
+List of lines with unknown acquisition framework codes:
+{% set total = 0 -%}
+{% for code, lines in reports['af_code_unknown_lines'].items() -%}
+    {% set total = total + len(lines) -%}
+    {{ code }}: {{ lines | join(', ') }}
+{% endfor %}
+    Total: {{ total }}
+-------------------------------------------------------------------------
+Script time:
+    Elapsed: {{ elapsed_time }}

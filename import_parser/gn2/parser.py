@@ -157,7 +157,8 @@ def add_uuid_obs(row):
 def replace_empty_value(row):
     # Set NULL instead of empty value for optional fields with UUID, INT, JSON or DATE type.
     fields = [
-        'unique_id_sinp', 'unique_id_sinp_grp', 'cd_nom', 'cd_hab', 'count_min', 'count_max',
+        'unique_id_sinp', 'unique_id_sinp_grp', 'code_dataset',
+        'cd_nom', 'cd_hab', 'count_min', 'count_max',
         'altitude_min', 'altitude_max', 'depth_min', 'depth_max', 'precision',
         'validation_date', 'determination_date', 'meta_create_date', 'meta_update_date',
         'additional_data',
@@ -271,6 +272,23 @@ def fix_inverted_altitudes(row, reader, reports):
         tmp_alt_min = row['altitude_min']
         row['altitude_min'] = row['altitude_max']
         row['altitude_max'] = tmp_alt_min
+    return row
+
+def fix_negative_altitudes(row, reader, reports):
+    if (
+        has_altitudes(row, reader, reports)
+        and int(row['altitude_max']) < 0
+        and int(row['altitude_min']) < 0
+    ):
+        report_value = get_report_field_value(row, reader)
+        reports['altitude_negative_lines'].append(report_value)
+        msg = f"WARNING ({report_value}): altitudes min ({row['altitude_min']}) - max ({row['altitude_max']}) negatives !"
+        print_error(msg)
+
+        row['depth_min'] = max(int(row['altitude_min']), int(row['altitude_max']))
+        row['depth_max'] = min(int(row['altitude_min']), int(row['altitude_max']))
+        row['altitude_min'] = Config.get('null_value_string')
+        row['altitude_max'] = Config.get('null_value_string')
     return row
 
 def fix_altitudes_errors(row, reader, reports):

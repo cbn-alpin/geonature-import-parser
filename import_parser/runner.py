@@ -172,6 +172,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
             'nomenclature_code_unknown_lines': {},
             'digitiser_code_unknown_lines': {},
             'af_code_unknown_lines': {},
+            'altitude_negative_lines' : [],
             'altitude_inverted_lines': [],
             'altitude_errors_lines': [],
             'altitude_min_fixed_lines': [],
@@ -231,6 +232,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                             if write_row != False:
                                 row = fix_altitude_min(row, reader, reports)
                                 row = fix_altitude_max(row, reader, reports)
+                                row = fix_negative_altitudes(row, reader, reports)
                                 row = fix_inverted_altitudes(row, reader, reports)
                                 row = fix_altitudes_errors(row, reader, reports)
 
