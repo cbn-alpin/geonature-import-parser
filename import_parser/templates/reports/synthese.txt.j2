@@ -3,12 +3,12 @@ SYNTHESE CSV file report
 Total lines removed: {{ reports['lines_removed_total'] }}
 -------------------------------------------------------------------------
 List of removed lines with unknown scinames codes:
-{% set total = 0 -%}
+{% set ns = namespace(total=0) -%}
 {% for sciname, lines in reports['sciname_removed_lines'].items() -%}
-    {% set total = total + lines | length -%}
+    {% set ns.total = ns.total + lines | length -%}
     {{ sciname }}: {{ lines | join(', ') }}
 {% endfor %}
-    Total: {{ total }}
+    Total: {{ ns.total }}
 -------------------------------------------------------------------------
 List of removed lines with missing date min or max:
     {{ reports['date_missing_removed_lines'] | join(', ') }}
@@ -19,36 +19,36 @@ List of removed lines with date max not greater than date min:
     Total: {{ reports['date_max_removed_lines'] | length }}
 -------------------------------------------------------------------------
 List of removed lines with unknown dataset codes:
-{% set total = 0 -%}
+{% set ns = namespace(total=0) -%}
 {% for dataset_code, lines in reports['dataset_code_unknown_lines'].items() -%}
-    {% set total = total + lines | length -%}
+    {% set ns.total = ns.total + lines | length -%}
     {{ dataset_code }}: {{ lines | join(', ') }}
 {% endfor %}
-    Total: {{ total }}
+    Total: {{ ns.total }}
 -------------------------------------------------------------------------
 List of lines with unknown nomenclature codes:
-{% set total = 0 -%}
+{% set ns = namespace(total=0) -%}
 {% for type_and_code, lines in reports['nomenclature_code_unknown_lines'].items() -%}
-    {% set total = total + lines | length -%}
+    {% set ns.total = ns.total + lines | length -%}
     {{ type_and_code }}: {{ lines | join(', ') }}
 {% endfor %}
-    Total: {{ total }}
+    Total: {{ ns.total }}
 -------------------------------------------------------------------------
 List of lines with unknown source codes:
-{% set total = 0 -%}
+{% set ns = namespace(total=0) -%}
 {% for code, lines in reports['source_code_unknown_lines'].items() -%}
-    {% set total = total + lines | length -%}
+    {% set ns.total = ns.total + lines | length -%}
     {{ code }}: {{ lines | join(', ') }}
 {% endfor %}
-    Total: {{ total }}
+    Total: {{ ns.total }}
 -------------------------------------------------------------------------
 List of lines with unknown digitiser codes:
-{% set total = 0 -%}
+{% set ns = namespace(total=0) -%}
 {% for digitiser_code, lines in reports['digitiser_code_unknown_lines'].items() -%}
-    {% set total = total + lines | length -%}
+    {% set ns.total = ns.total + lines | length -%}
     {{ digitiser_code }}: {{ lines | join(', ') }}
 {% endfor %}
-    Total: {{ total }}
+    Total: {{ ns.total }}
 -------------------------------------------------------------------------
 List of lines with altitude min fixed:
     {{ reports['altitude_min_fixed_lines'] | join(', ') }}
