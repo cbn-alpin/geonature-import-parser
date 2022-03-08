@@ -70,5 +70,13 @@ List of lines with altitudes errors:
     {{ reports['altitude_errors_lines'] | join(', ') }}
     Total: {{ reports['altitude_errors_lines'] | length }}
 -------------------------------------------------------------------------
+List of lines with depth min fixed:
+    {{ reports['depth_min_fixed_lines'] | join(', ') }}
+    Total: {{ reports['depth_min_fixed_lines'] | length }}
+-------------------------------------------------------------------------
+List of lines with depth max fixed:
+    {{ reports['depth_max_fixed_lines'] | join(', ') }}
+    Total: {{ reports['depth_max_fixed_lines'] | length }}
+-------------------------------------------------------------------------
 Script time:
     Elapsed: {{ elapsed_time }}

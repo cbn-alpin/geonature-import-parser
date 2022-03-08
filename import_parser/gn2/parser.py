@@ -318,6 +318,46 @@ def fix_altitudes_errors(row, reader, reports):
         row['altitude_max'] = Config.get('null_value_string')
     return row
 
+def fix_depth_min(row, reader, reports):
+    decimal_separators = [',', '.']
+    if 'depth_min' in row.keys() and not is_empty_or_null(row['depth_min']):
+        depth = str(row['depth_min'])
+        if [sep for sep in decimal_separators if (sep in depth)]:
+            depth_fixed = depth
+            for sep in decimal_separators:
+                if depth_fixed.find(sep) >= 0:
+                    depth_fixed = depth_fixed[:depth_fixed.find(sep)]
+            report_value = get_report_field_value(row, reader)
+            msg = [
+                f'WARNING ({report_value}): depth min fixing !',
+                f'\tDepth: {depth}',
+                f'\tDepth fixed: {depth_fixed}'
+            ]
+            print_error('\n'.join(msg))
+            reports['depth_min_fixed_lines'].append(report_value)
+            row['depth_min'] = depth_fixed
+    return row
+
+def fix_depth_max(row, reader, reports):
+    decimal_separators = [',', '.']
+    if 'depth_max' in row.keys() and not is_empty_or_null(row['depth_max']):
+        depth = str(row['depth_max'])
+        if [sep for sep in decimal_separators if (sep in depth)]:
+            depth_fixed = depth
+            for sep in decimal_separators:
+                if depth_fixed.find(sep) >= 0:
+                    depth_fixed = depth_fixed[:depth_fixed.find(sep)]
+            report_value = get_report_field_value(row, reader)
+            reports['depth_max_fixed_lines'].append(report_value)
+            msg = [
+                f'WARNING ({report_value}): depth max fixing !',
+                f'\tDepth: {depth}',
+                f'\tDepth fixed: {depth_fixed}'
+            ]
+            print_error('\n'.join(msg))
+            row['depth_max'] = depth_fixed
+    return row
+
 def replace_code_dataset(row, datasets, reader, reports):
     if 'code_dataset' in row.keys() and not is_empty_or_null(row['code_dataset']):
         code = row['code_dataset']

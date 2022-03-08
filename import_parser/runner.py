@@ -177,6 +177,8 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
             'altitude_errors_lines': [],
             'altitude_min_fixed_lines': [],
             'altitude_max_fixed_lines': [],
+            'depth_min_fixed_lines': [],
+            'depth_max_fixed_lines': [],
         }
 
         reader = csv.DictReader(f_src, dialect=reader_dialect)
@@ -235,6 +237,8 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                                 row = fix_negative_altitudes(row, reader, reports)
                                 row = fix_inverted_altitudes(row, reader, reports)
                                 row = fix_altitudes_errors(row, reader, reports)
+                                row = fix_depth_min(row, reader, reports)
+                                row = fix_depth_max(row, reader, reports)
 
                             # Replace codes
                             if write_row != False:
