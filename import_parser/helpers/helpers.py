@@ -47,3 +47,12 @@ def is_empty_or_null(value):
     elif value == Config.get('null_value_string'):
         is_eon = True
     return is_eon
+
+
+def get_date_format(date):
+    if "." in date:
+        return "%Y-%m-%d %H:%M:%S.%f"
+    elif ":" in date:
+        return "%Y-%m-%d %H:%M:%S"
+    else:
+        return "%Y-%m-%d"

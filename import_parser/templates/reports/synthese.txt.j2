@@ -18,6 +18,14 @@ List of removed lines with date max not greater than date min:
     {{ reports['date_max_removed_lines'] | join(', ') }}
     Total: {{ reports['date_max_removed_lines'] | length }}
 -------------------------------------------------------------------------
+List of removed lines with date min in the future:
+    {{ reports['date_min_in_future_removed_lines'] | join(', ') }}
+    Total: {{ reports['date_min_in_future_removed_lines'] | length }}
+-------------------------------------------------------------------------
+List of removed lines with date max in the future:
+    {{ reports['date_max_in_future_removed_lines'] | join(', ') }}
+    Total: {{ reports['date_max_in_future_removed_lines'] | length }}
+-------------------------------------------------------------------------
 List of removed lines with unknown dataset codes:
 {% set ns = namespace(total=0) -%}
 {% for dataset_code, lines in reports['dataset_code_unknown_lines'].items() -%}

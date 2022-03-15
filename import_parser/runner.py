@@ -166,6 +166,8 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
             'sciname_removed_lines': {},
             'date_missing_removed_lines': [],
             'date_max_removed_lines': [],
+            'date_min_in_future_removed_lines': [],
+            'date_max_in_future_removed_lines': [],
             'source_code_unknown_lines': {},
             'dataset_code_unknown_lines': {},
             'organism_code_unknown_lines': {},
@@ -229,6 +231,12 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                             elif check_date_max_greater_than_min(row, reader, reports) == False:
                                 write_row = False
                                 print_error(f"Line {reader.line_num} removed, date max not greater than date min !")
+                            elif check_date_min_in_future(row, reader, reports) == False:
+                                write_row = False
+                                print_error(f"Line {reader.line_num} removed, date min in the future !")
+                            elif check_date_max_in_future(row, reader, reports) == False:
+                                write_row = False
+                                print_error(f"Line {reader.line_num} removed, date max in the future !")
 
                             # Fix altitudes
                             if write_row != False:

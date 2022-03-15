@@ -3,11 +3,14 @@ import sys
 import re
 import uuid
 import configparser
+import datetime
 from collections import OrderedDict
+
 
 from helpers.config import Config
 from helpers.helpers import (
-    print_msg, print_info, print_error, print_verbose, find_ranges, is_uuid, is_empty_or_null
+    print_msg, print_info, print_error, print_verbose, find_ranges, is_uuid, is_empty_or_null,
+    get_date_format,
 )
 
 # TODO: use at least one class to store all methods
@@ -205,6 +208,32 @@ def check_dates(row, reader, reports):
         reports['lines_removed_total'] += 1
         report_value = get_report_field_value(row, reader)
         reports['date_missing_removed_lines'].append(report_value)
+    return is_ok
+
+def check_date_min_in_future(row, reader, reports):
+    is_ok = True
+    date_format = get_date_format(row['date_min'])
+    past = datetime.datetime.strptime(row['date_min'], date_format)
+    present = datetime.datetime.now()
+    if past.date() > present.date():
+        is_ok = False
+    if not is_ok:
+        reports['lines_removed_total'] += 1
+        report_value = get_report_field_value(row, reader)
+        reports['date_min_in_future_removed_lines'].append(report_value)
+    return is_ok
+
+def check_date_max_in_future(row, reader, reports):
+    is_ok = True
+    date_format = get_date_format(row['date_max'])
+    past = datetime.datetime.strptime(row['date_max'], date_format)
+    present = datetime.datetime.now()
+    if past.date() > present.date():
+        is_ok = False
+    if not is_ok:
+        reports['lines_removed_total'] += 1
+        report_value = get_report_field_value(row, reader)
+        reports['date_max_in_future_removed_lines'].append(report_value)
     return is_ok
 
 def check_date_max_greater_than_min(row, reader, reports):
