@@ -46,23 +46,20 @@ def add_headers(fieldnames):
         new_fieldnames = []
         fields_patterns = get_add_columns_params()
         for field in fieldnames:
-            inserted = False
-            for pattern, params in fields_patterns.items():
+            new_fieldnames.append(field)
+            for params in fields_patterns:
+                pattern = params['pattern']
                 if re.match(rf'^{pattern}$', field):
-                    inserted = True
                     pos = params['position']
                     new_field = params['new_field']
+                    field_idx = new_fieldnames.index(field)
                     if pos == 'before':
-                        new_fieldnames.append(new_field)
-                        new_fieldnames.append(field)
+                        new_fieldnames.insert(field_idx, new_field)
                     elif pos == 'after':
-                        new_fieldnames.append(field)
-                        new_fieldnames.append(new_field)
+                        new_fieldnames.insert((field_idx + 1), new_field)
                     else:
                         print_error(f"Position value for actions.add_columns.params unknown in parser_action.ini: {pos}")
                         exit(1)
-            if not inserted:
-                new_fieldnames.append(field)
         return new_fieldnames
     else:
         return fieldnames.copy()
@@ -92,41 +89,43 @@ def remove_columns(row, reader):
 def add_columns(row):
     if Config.get('actions.add_columns'):
         fields_patterns = get_add_columns_params()
-        new_row = OrderedDict()
+        new_row = []
         fieldnames = list(row.keys())
         for field in fieldnames:
-            inserted = False
-            for pattern, params in fields_patterns.items():
+            new_row.append((field, row[field]))
+            for params in fields_patterns:
+                pattern = params['pattern']
                 if re.match(rf'^{pattern}$', field):
-                    inserted = True
                     pos = params['position']
                     new_field = params['new_field']
                     new_value = params['value']
+                    field_idx = new_row.index((field, row[field]))
                     if pos == 'before':
-                        new_row[new_field] = new_value
-                        new_row[field] = row[field]
+                        new_row.insert(field_idx, (new_field, new_value))
                     elif pos == 'after':
-                        new_row[field] = row[field]
-                        new_row[new_field] = new_value
+                        new_row.insert((field_idx + 1), (new_field, new_value))
                     else:
                         print_error(f"Position value for actions.add_columns.params unknown in parser_action.ini: {pos}")
                         exit(1)
-            if not inserted:
-                new_row[field] = row[field]
-        return new_row
+
+        # Rebuild output row as OrderedDict
+        out_new_row = OrderedDict()
+        for row in new_row:
+            out_new_row[row[0]] = row[1]
+        return out_new_row
     else:
         return row
 
 def get_add_columns_params():
     cols_to_add =  Config.get('actions.add_columns.params')
-    fields_patterns = {}
+    fields_patterns = []
     for new_field, params in cols_to_add.items():
-        pattern = params['field']
-        fields_patterns[pattern] = {
+        fields_patterns.append({
+            'pattern': params['field'],
             'new_field': new_field,
             'position': params['position'],
             'value': params['value'],
-        }
+        })
     return fields_patterns
 
 
