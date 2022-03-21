@@ -199,50 +199,54 @@ def check_sciname_code(row, scinames_codes, reader, reports):
 
 def check_dates(row, reader, reports):
     is_ok = True
-    if row['date_min'] == None or row['date_min'] == Config.get('null_value_string'):
-        is_ok = False
-    if row['date_max'] == None or row['date_max'] == Config.get('null_value_string'):
-        is_ok = False
-    if not is_ok:
-        reports['lines_removed_total'] += 1
-        report_value = get_report_field_value(row, reader)
-        reports['date_missing_removed_lines'].append(report_value)
+    if 'meta_last_action' in row.keys() and row['meta_last_action'] != 'D':
+        if row['date_min'] == None or row['date_min'] == Config.get('null_value_string'):
+            is_ok = False
+        if row['date_max'] == None or row['date_max'] == Config.get('null_value_string'):
+            is_ok = False
+        if not is_ok:
+            reports['lines_removed_total'] += 1
+            report_value = get_report_field_value(row, reader)
+            reports['date_missing_removed_lines'].append(report_value)
     return is_ok
 
 def check_date_min_in_future(row, reader, reports):
     is_ok = True
-    date_format = get_date_format(row['date_min'])
-    past = datetime.datetime.strptime(row['date_min'], date_format)
-    present = datetime.datetime.now()
-    if past.date() > present.date():
-        is_ok = False
-    if not is_ok:
-        reports['lines_removed_total'] += 1
-        report_value = get_report_field_value(row, reader)
-        reports['date_min_in_future_removed_lines'].append(report_value)
+    if 'meta_last_action' in row.keys() and row['meta_last_action'] != 'D':
+        date_format = get_date_format(row['date_min'])
+        past = datetime.datetime.strptime(row['date_min'], date_format)
+        present = datetime.datetime.now()
+        if past.date() > present.date():
+            is_ok = False
+        if not is_ok:
+            reports['lines_removed_total'] += 1
+            report_value = get_report_field_value(row, reader)
+            reports['date_min_in_future_removed_lines'].append(report_value)
     return is_ok
 
 def check_date_max_in_future(row, reader, reports):
     is_ok = True
-    date_format = get_date_format(row['date_max'])
-    past = datetime.datetime.strptime(row['date_max'], date_format)
-    present = datetime.datetime.now()
-    if past.date() > present.date():
-        is_ok = False
-    if not is_ok:
-        reports['lines_removed_total'] += 1
-        report_value = get_report_field_value(row, reader)
-        reports['date_max_in_future_removed_lines'].append(report_value)
+    if 'meta_last_action' in row.keys() and row['meta_last_action'] != 'D':
+        date_format = get_date_format(row['date_max'])
+        past = datetime.datetime.strptime(row['date_max'], date_format)
+        present = datetime.datetime.now()
+        if past.date() > present.date():
+            is_ok = False
+        if not is_ok:
+            reports['lines_removed_total'] += 1
+            report_value = get_report_field_value(row, reader)
+            reports['date_max_in_future_removed_lines'].append(report_value)
     return is_ok
 
 def check_date_max_greater_than_min(row, reader, reports):
-    is_ok = False
-    if check_dates(row, reader, reports) and row['date_max'] >= row['date_min']:
-        is_ok = True
-    if not is_ok:
-        reports['lines_removed_total'] += 1
-        report_value = get_report_field_value(row, reader)
-        reports['date_max_removed_lines'].append(report_value)
+    is_ok = True
+    if 'meta_last_action' in row.keys() and row['meta_last_action'] != 'D':
+        if check_dates(row, reader, reports) and row['date_max'] < row['date_min']:
+            is_ok = False
+        if not is_ok:
+            reports['lines_removed_total'] += 1
+            report_value = get_report_field_value(row, reader)
+            reports['date_max_removed_lines'].append(report_value)
     return is_ok
 
 def fix_altitude_min(row, reader, reports):
