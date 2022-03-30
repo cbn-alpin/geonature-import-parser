@@ -2,6 +2,7 @@ import click
 import operator
 import itertools
 import uuid
+import re
 
 from helpers.config import Config
 
@@ -32,11 +33,14 @@ def find_ranges(data):
         ranges.append((group[0],group[-1]))
     return ranges
 
-def is_uuid(value):
+def is_uuid_v4(value):
     try:
         return uuid.UUID(value).version == 4
     except ValueError:
         return False
+
+def is_uuid(value):
+    return True if re.search('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', value) else False
 
 def is_empty_or_null(value):
     is_eon = False
