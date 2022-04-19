@@ -143,10 +143,11 @@ def force_protected_char(row):
     fieldnames = list(row.keys())
     for field in fieldnames:
         value = row[field]
-        value = re.sub(r'\r\n', '\\r\\n', value)
-        value = re.sub(r'\n', '\\n', value)
-        value = re.sub(r'\r', '\\r', value)
-        value = re.sub(r'\t', '\\t', value)
+        if value != None:
+            value = re.sub(r'\r\n', '\\r\\n', value)
+            value = re.sub(r'\n', '\\n', value)
+            value = re.sub(r'\r', '\\r', value)
+            value = re.sub(r'\t', '\\t', value)
         row[field] = value
     return row
 
