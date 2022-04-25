@@ -1,1 +1,1 @@
-/home/jpmilcent/workspace/cbna/sinp/sinp-aura-data/import-parser/import_parser/gn_runner.py
+../import_parser/gn_runner.py
