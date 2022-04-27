@@ -47,3 +47,17 @@ def flip_text_row(row, attributes):
                 'text': value,
             })
     return new_rows
+
+def check_taxon_code(row, taxons_codes):
+    exists = False
+    if row['cd_ref'] != None and row['cd_ref'] != Config.get('null_value_string'):
+        exists = (str(row['cd_ref']) in taxons_codes.keys())
+    return exists
+
+def replace_taxon_code(row, scinames_codes):
+    exists = False
+    if row['cd_ref'] != None and row['cd_ref'] != Config.get('null_value_string'):
+        exists = (str(row['cd_ref']) in scinames_codes.keys())
+    if exists:
+        row['cd_ref'] = scinames_codes[row['cd_ref']]
+    return (exists, row)

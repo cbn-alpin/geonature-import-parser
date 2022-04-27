@@ -40,6 +40,7 @@ from th.parser import *
         t (=text),
         a (=attribute),
         th =(theme),
+        m =(media),
     ''',
 )
 @click.option(
@@ -128,7 +129,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
     )
 
     # Access to the database if necessary
-    db_access_need = set(['a', 't',])
+    db_access_need = set(['a', 't', 'm'])
     if import_type in db_access_need:
         db = ThDatabase()
         db.connect_to_database()
@@ -140,6 +141,9 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
         themes = db.get_all_themes()
     elif import_type == 't':
         attributes = db.get_all_attributes()
+    elif import_type == 'm':
+        taxons_codes = db.get_all_taxons_codes()
+        scinames_codes = db.get_all_scinames_codes()
 
     # Open CSV files
     with open(filename_src, 'r', newline='', encoding='utf-8') as f_src:
@@ -186,6 +190,19 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                         for new_row in flip_text_row(row, attributes):
                             # Write in destination file
                             writer.writerow(new_row)
+                    elif import_type == 'm':
+                        # Check Taxon code (=cd_ref)
+                        if check_taxon_code(row, taxons_codes) == False:
+                            print_error(f"Line {reader.line_num}: taxon code {row['cd_ref']} not exists ! Trying to find a cd_ref by using cd_nom in TaxRef !")
+                            (exists, row) = replace_taxon_code(row, scinames_codes)
+                            if exists == False:
+                                print_error(f"Line {reader.line_num} removed ! Taxon or sciname code {row['cd_ref']} not exists in TaxRef !")
+                            else:
+                                writer.writerow(row)
+                        else:
+                            writer.writerow(row)
+                    else:
+                        writer.writerow(row)
             except csv.Error as e:
                 sys.exit(f'Error in file {filename}, line {reader.line_num}: {e}')
 
@@ -198,11 +215,13 @@ def set_actions_type(abbr_type):
         'th': 'THEME',
         'a': 'ATTRIBUT',
         't': 'TEXT',
+        'm': 'MEDIA',
     }
     if abbr_type in types:
         Config.setParameter('actions.type', types[abbr_type])
     else:
         print_error(f'Type "{abbr_type}" is not implemented !')
+        exit()
 
 def load_actions_config_file(actions_config_file):
     if actions_config_file != '' and os.path.exists(actions_config_file) :

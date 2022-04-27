@@ -51,3 +51,25 @@ class ThDatabase:
         for record in records:
             themes[record['code']] = record['id']
         return themes
+
+    def get_all_taxons_codes(self):
+        self.db_cursor.execute(f"""
+            SELECT DISTINCT cd_ref AS code, lb_nom AS name
+            FROM taxonomie.taxref
+        """)
+        records = self.db_cursor.fetchall()
+        codes = {}
+        for record in records:
+            codes[str(record['code'])] = record['name']
+        return codes
+
+    def get_all_scinames_codes(self):
+        self.db_cursor.execute(f"""
+            SELECT DISTINCT cd_nom AS sciname_code, cd_ref AS taxon_code
+            FROM taxonomie.taxref
+        """)
+        records = self.db_cursor.fetchall()
+        codes = {}
+        for record in records:
+            codes[str(record['sciname_code'])] = record['taxon_code']
+        return codes
