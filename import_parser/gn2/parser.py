@@ -214,11 +214,21 @@ def check_dates(row, reader, reports):
 def check_date_min_in_future(row, reader, reports):
     is_ok = True
     if 'meta_last_action' in row.keys() and row['meta_last_action'] != 'D':
-        date_format = get_date_format(row['date_min'])
-        past = datetime.datetime.strptime(row['date_min'], date_format)
-        present = datetime.datetime.now()
-        if past.date() > present.date():
+        try:
+            date_format = get_date_format(row['date_min'])
+            past = datetime.datetime.strptime(row['date_min'], date_format)
+            present = datetime.datetime.now()
+            if past.date() > present.date():
+                is_ok = False
+        except ValueError as e:
+            report_value = get_report_field_value(row, reader)
+            msg = [
+                f'WARNING ({report_value}): ValueError !',
+                f'\tError: {str(e)}',
+            ]
+            print_error('\n'.join(msg))
             is_ok = False
+
         if not is_ok:
             reports['lines_removed_total'] += 1
             report_value = get_report_field_value(row, reader)
