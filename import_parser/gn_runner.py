@@ -100,6 +100,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
     click.echo('Columns to set values: ' + json.dumps(Config.get('actions.set_values.params'), indent=4, sort_keys=True, default=str))
     click.echo(f'CSV Reader dialect: {reader_dialect}')
     click.echo(f'CSV Writer dialect: {writer_dialect}')
+    click.echo('fk.organisms ? ' + (str(Config.get('fk.organisms')) if Config.has('fk.organisms') else 'none'))
 
     csv.register_dialect(
         'ssv',
