@@ -540,6 +540,7 @@ def replace_code_digitiser(row, users, reader, reports):
         code = row['code_digitiser']
         try:
             if users[code]:
+                print(f"USERS CODE : {users[code]}")
                 row['code_digitiser'] = users[code]
         except KeyError as e:
             report_value = get_report_field_value(row, reader)
