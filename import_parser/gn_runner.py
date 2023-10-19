@@ -102,6 +102,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
     click.echo(f'CSV Writer dialect: {writer_dialect}')
     click.echo('fk.organisms ? ' + (str(Config.get('fk.organisms')) if Config.has('fk.organisms') else 'none'))
     click.echo('fk.af ? ' + (str(Config.get('fk.af')) if Config.has('fk.af') else 'none'))
+    click.echo('fk.users ? ' + (str(Config.get('fk.users')) if Config.has('fk.users') else 'none'))
 
     csv.register_dialect(
         'ssv',
