@@ -489,14 +489,27 @@ def replace_code_source(row, sources, reader, reports):
             (reports["source_code_unknown_lines"].setdefault(str(code), []).append(report_value))
             row["code_source"] = Config.get("null_value_string")
     return row
+
+
+def replace_code_area(row, areas, reader, reports):
+    if "code_area_attachment" in row.keys() and not is_empty_or_null(row["code_area_attachment"]):
+        type = row["code_area_attachment"].split(".")[0]
+        code = row["code_area_attachment"].split(".")[1]
+        try:
+            if areas[type][code]:
+                row["code_area_attachment"] = areas[type][code]
+        except KeyError as e:
+            report_value = get_report_field_value(row, reader)
+            msg = [
+                f"WARNING ({report_value}): area code or area type missing !",
+                f"\tArea type: {type}",
+                f"\tArea code: {code}",
+                f"\tSet 'code_area_attachment' and 'code_nomenclature_info_geo_type' to null value string !",
             ]
-            print_error('\n'.join(msg))
-            (
-                reports['source_code_unknown_lines']
-                .setdefault(str(code), [])
-                .append(report_value)
-            )
-            row['code_source'] = Config.get('null_value_string')
+            print_error("\n".join(msg))
+            (reports["area_code_unknown_lines"].setdefault(str(code), []).append(report_value))
+            row["code_area_attachment"] = Config.get("null_value_string")
+            row["code_nomenclature_info_geo_type"] = Config.get("null_value_string")
     return row
 
 

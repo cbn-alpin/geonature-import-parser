@@ -161,7 +161,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
         nomenclatures = db.get_all_nomenclatures()
         scinames_codes = db.get_all_scinames_codes()
         users = db.get_all_users()
-    elif import_type == 'u':
+        areas = db.get_all_areas()
     elif import_type == "u":
         organisms = db.get_all_organisms()
     elif import_type == "af":
@@ -185,6 +185,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
             "date_max_in_future_removed_lines": [],
             "source_code_unknown_lines": {},
             "dataset_code_unknown_lines": {},
+            "area_code_unknown_lines": {},
             "organism_code_unknown_lines": {},
             "nomenclature_code_unknown_lines": {},
             "digitiser_code_unknown_lines": {},
@@ -287,7 +288,8 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                                 row = replace_code_nomenclature(row, nomenclatures, reader, reports)
                                 # Replace Digitiser Code
                                 row = replace_code_digitiser(row, users, reader, reports)
-                        elif import_type == 'u':
+                                # Replace Area Code
+                                row = replace_code_area(row, areas, reader, reports)
                         elif import_type == "u":
                             # Replace Organism Code
                             row = replace_code_organism(row, organisms, reader, reports)

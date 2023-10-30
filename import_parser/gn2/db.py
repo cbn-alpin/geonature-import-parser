@@ -86,6 +86,24 @@ class GnDatabase:
             sources[record["code"]] = record["id"]
         return sources
 
+    def get_all_areas(self):
+        self.db_cursor.execute(
+            f"""
+            SELECT 
+                bib.type_code AS type,
+                la.id_area AS id,
+                la.area_code AS code
+            FROM ref_geo.bib_areas_types bib 
+            JOIN ref_geo.l_areas la ON la.id_type = bib.id_type
+        """
+        )
+        records = self.db_cursor.fetchall()
+        areas = {}
+        for record in records:
+            areas.setdefault(record["type"], {})
+            areas[record["type"]][record["code"]] = record["id"]
+        return areas
+
     def get_all_nomenclatures(self):
         nomenclatures_columns_types = Config.getSection("NOMENCLATURES")
         types = list(nomenclatures_columns_types.values())
