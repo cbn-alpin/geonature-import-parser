@@ -348,8 +348,6 @@ def set_actions_type(abbr_type):
         "s": "SYNTHESE",
         "so": "SOURCE",
         "u": "USER",
-        "tr": "TAXREF_RANGS",
-        "t": "TAXREF",
     }
     if abbr_type in types:
         Config.setParameter("actions.type", types[abbr_type])
