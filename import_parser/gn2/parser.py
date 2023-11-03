@@ -382,9 +382,9 @@ def fix_altitudes_errors(row, reader, reports):
         and (
             int(row["altitude_max"]) >= int(row["altitude_min"])
             and int(row["altitude_min"]) >= -11022
-            and int(row["altitude_min"]) <= 4696  # Fosse des Mariannes < Mont Blanc
+            and int(row["altitude_min"]) <= 4809  # Fosse des Mariannes < Mont Blanc
             and int(row["altitude_max"]) >= -11022
-            and int(row["altitude_max"]) <= 4696  # Fosse des Mariannes < Mont Blanc
+            and int(row["altitude_max"]) <= 4809  # Fosse des Mariannes < Mont Blanc
         )
     ):
         is_ok = True
