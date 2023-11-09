@@ -41,7 +41,9 @@ from gn2.parser import *
         d (=dataset),
         af (=acquisition_framework),
         o (=organism),
-        u (=user)
+        u (=user),
+        tr (=taxref_rangs),
+        t (=taxref),
     """,
 )
 @click.option(
@@ -348,6 +350,8 @@ def set_actions_type(abbr_type):
         "s": "SYNTHESE",
         "so": "SOURCE",
         "u": "USER",
+        "tr": "TAXREF_RANGS",
+        "t": "TAXREF",
     }
     if abbr_type in types:
         Config.setParameter("actions.type", types[abbr_type])

@@ -216,8 +216,6 @@ def set_actions_type(abbr_type):
         'a': 'ATTRIBUT',
         't': 'TEXT',
         'm': 'MEDIA',
-        "tr": "TAXREF_RANGS",
-        "t": "TAXREF",
     }
     if abbr_type in types:
         Config.setParameter('actions.type', types[abbr_type])
