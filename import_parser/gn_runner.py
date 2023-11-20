@@ -42,7 +42,7 @@ from gn2.parser import *
         af (=acquisition_framework),
         o (=organism),
         u (=user),
-        tr (=taxref_rangs),
+        tr (=taxref_rank),
         t (=taxref),
     """,
 )
@@ -350,7 +350,7 @@ def set_actions_type(abbr_type):
         "s": "SYNTHESE",
         "so": "SOURCE",
         "u": "USER",
-        "tr": "TAXREF_RANGS",
+        "tr": "TAXREF_RANK",
         "t": "TAXREF",
     }
     if abbr_type in types:
