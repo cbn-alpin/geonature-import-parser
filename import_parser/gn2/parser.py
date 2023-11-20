@@ -1,8 +1,5 @@
-import os
-import sys
 import re
 import uuid
-import configparser
 import datetime
 from collections import OrderedDict
 
@@ -12,8 +9,6 @@ from helpers.helpers import (
     print_msg,
     print_info,
     print_error,
-    print_verbose,
-    find_ranges,
     is_uuid,
     is_empty_or_null,
     get_date_format,
@@ -85,7 +80,7 @@ def remove_columns(row, reader):
                 try:
                     if re.match(rf"^{pattern}$", field):
                         del row[field]
-                except TypeError as e:
+                except TypeError:
                     report_value = get_report_field_value(row, reader)
                     msg = [
                         f"ERROR ({report_value}): in remove_columns().",
@@ -161,7 +156,7 @@ def force_protected_char(row):
     fieldnames = list(row.keys())
     for field in fieldnames:
         value = row[field]
-        if value != None:
+        if value is not None:
             value = re.sub(r"\r\n", "\\r\\n", value)
             value = re.sub(r"\n", "\\n", value)
             value = re.sub(r"\r", "\\r", value)
@@ -221,7 +216,7 @@ def get_report_field_value(row, reader):
 
 def check_sciname_code(row, scinames_codes, reader, reports):
     exists = True
-    if row["cd_nom"] != None and row["cd_nom"] != Config.get("null_value_string"):
+    if row["cd_nom"] is not None and row["cd_nom"] != Config.get("null_value_string"):
         exists = str(row["cd_nom"]) in scinames_codes
     if not exists:
         reports["lines_removed_total"] += 1
@@ -233,9 +228,9 @@ def check_sciname_code(row, scinames_codes, reader, reports):
 def check_dates(row, reader, reports):
     is_ok = True
     if "meta_last_action" in row.keys() and row["meta_last_action"] != "D":
-        if row["date_min"] == None or row["date_min"] == Config.get("null_value_string"):
+        if row["date_min"] is None or row["date_min"] == Config.get("null_value_string"):
             is_ok = False
-        if row["date_max"] == None or row["date_max"] == Config.get("null_value_string"):
+        if row["date_max"] is None or row["date_max"] == Config.get("null_value_string"):
             is_ok = False
         if not is_ok:
             reports["lines_removed_total"] += 1
@@ -358,11 +353,7 @@ def fix_inverted_altitudes(row, reader, reports):
 
 
 def fix_negative_altitudes(row, reader, reports):
-    if (
-        has_altitudes(row, reader, reports)
-        and int(row["altitude_max"]) < 0
-        and int(row["altitude_min"]) < 0
-    ):
+    if has_altitudes(row, reader, reports) and int(row["altitude_max"]) < 0 and int(row["altitude_min"]) < 0:
         report_value = get_report_field_value(row, reader)
         reports["altitude_negative_lines"].append(report_value)
         msg = f"WARNING ({report_value}): altitudes min ({row['altitude_min']}) - max ({row['altitude_max']}) negatives !"
@@ -377,8 +368,8 @@ def fix_negative_altitudes(row, reader, reports):
 
 def fix_altitudes_errors(row, reader, reports):
     is_ok = False
-    if has_altitudes(row, reader, reports) == False or (
-        has_altitudes(row, reader, reports) == True
+    if has_altitudes(row, reader, reports) is False or (
+        has_altitudes(row, reader, reports) is True
         and (
             int(row["altitude_max"]) >= int(row["altitude_min"])
             and int(row["altitude_min"]) >= -11022
@@ -394,7 +385,7 @@ def fix_altitudes_errors(row, reader, reports):
             f"WARNING ({report_value}): altitude error !",
             f"\tAltitude min: {row['altitude_min']}",
             f"\tAltitude max: {row['altitude_max']}",
-            f"\tSet to null value string !",
+            "\tSet to null value string !",
         ]
         print_error("\n".join(msg))
         reports["altitude_errors_lines"].append(report_value)
@@ -451,12 +442,12 @@ def replace_code_dataset(row, datasets, reader, reports):
         try:
             if datasets[code]:
                 row["code_dataset"] = datasets[code]
-        except KeyError as e:
+        except KeyError:
             report_value = get_report_field_value(row, reader)
             msg = [
                 f"WARNING ({report_value}): dataset code missing !",
                 f"\tDataset code: {code}",
-                f"\tSet to null value string !",
+                "\tSet to null value string !",
             ]
             print_error("\n".join(msg))
             (reports["dataset_code_unknown_lines"].setdefault(str(code), []).append(report_value))
@@ -478,12 +469,12 @@ def replace_code_source(row, sources, reader, reports):
         try:
             if sources[code]:
                 row["code_source"] = sources[code]
-        except KeyError as e:
+        except KeyError:
             report_value = get_report_field_value(row, reader)
             msg = [
                 f"WARNING ({report_value}): source code missing !",
                 f"\tSource code: {code}",
-                f"\tSet to null value string !",
+                "\tSet to null value string !",
             ]
             print_error("\n".join(msg))
             (reports["source_code_unknown_lines"].setdefault(str(code), []).append(report_value))
@@ -498,13 +489,13 @@ def replace_code_area(row, areas, reader, reports):
         try:
             if areas[type][code]:
                 row["code_area_attachment"] = areas[type][code]
-        except KeyError as e:
+        except KeyError:
             report_value = get_report_field_value(row, reader)
             msg = [
                 f"WARNING ({report_value}): area code or area type missing !",
                 f"\tArea type: {type}",
                 f"\tArea code: {code}",
-                f"\tSet 'code_area_attachment' and 'code_nomenclature_info_geo_type' to null value string !",
+                "\tSet 'code_area_attachment' and 'code_nomenclature_info_geo_type' to null value string !",
             ]
             print_error("\n".join(msg))
             (reports["area_code_unknown_lines"].setdefault(str(code), []).append(report_value))
@@ -535,13 +526,13 @@ def replace_code_nomenclature(row, nomenclatures, reader, reports):
             elif code != Config.get("null_value_string"):
                 try:
                     row[field] = nomenclatures[nomenclature_type][code]
-                except KeyError as e:
+                except KeyError:
                     report_value = get_report_field_value(row, reader)
                     msg = [
                         f"WARNING ({report_value}): nomenclature entry missing !",
                         f"\tNomenclature type: {nomenclature_type}",
                         f"\tCode: {code}",
-                        f"\tSet to null value string !",
+                        "\tSet to null value string !",
                     ]
                     print_error("\n".join(msg))
                     (
@@ -559,12 +550,12 @@ def replace_code_organism(row, organisms, reader, reports):
         try:
             if organisms[code]:
                 row["code_organism"] = organisms[code]
-        except KeyError as e:
+        except KeyError:
             report_value = get_report_field_value(row, reader)
             msg = [
                 f"WARNING ({report_value}): organism code missing !",
                 f"\tOrganism code: {code}",
-                f"\tSet to null value string !",
+                "\tSet to null value string !",
             ]
             print_error("\n".join(msg))
             (reports["organism_code_unknown_lines"].setdefault(str(code), []).append(report_value))
@@ -573,19 +564,17 @@ def replace_code_organism(row, organisms, reader, reports):
 
 
 def replace_code_acquisition_framework(row, acquisition_frameworks, reader, reports):
-    if "code_acquisition_framework" in row and not is_empty_or_null(
-        row["code_acquisition_framework"]
-    ):
+    if "code_acquisition_framework" in row and not is_empty_or_null(row["code_acquisition_framework"]):
         code = row["code_acquisition_framework"]
         try:
             if acquisition_frameworks[code]:
                 row["code_acquisition_framework"] = acquisition_frameworks[code]
-        except KeyError as e:
+        except KeyError:
             report_value = get_report_field_value(row, reader)
             msg = [
                 f"WARNING ({report_value}): acquisition framework code missing !",
                 f"\tAcquisition framework code: {code}",
-                f"\tSet to null value string !",
+                "\tSet to null value string !",
             ]
             print_error("\n".join(msg))
             (reports["af_code_unknown_lines"].setdefault(str(code), []).append(report_value))
@@ -599,12 +588,12 @@ def replace_code_digitiser(row, users, reader, reports):
         try:
             if users[code]:
                 row["code_digitiser"] = users[code]
-        except KeyError as e:
+        except KeyError:
             report_value = get_report_field_value(row, reader)
             msg = [
                 f"WARNING ({report_value}): digitiser (=> user) code missing !",
                 f"\Digitiser code: {code}",
-                f"\tSet to null value string !",
+                "\tSet to null value string !",
             ]
             print_error("\n".join(msg))
             (reports["digitiser_code_unknown_lines"].setdefault(str(code), []).append(report_value))

@@ -8,6 +8,42 @@ import json
 import click
 from jinja2 import Environment, FileSystemLoader
 
+from gn2.db import GnDatabase
+from helpers.config import Config
+from helpers.helpers import print_error
+from gn2.parser import (
+    calculate_csv_entries_number,
+    remove_headers,
+    add_headers,
+    remove_columns,
+    add_columns,
+    insert_values_to_columns,
+    force_protected_char,
+    add_uuid_obs,
+    replace_empty_value,
+    check_sciname_code,
+    check_dates,
+    check_date_max_greater_than_min,
+    check_date_min_in_future,
+    check_date_max_in_future,
+    fix_altitude_min,
+    fix_altitude_max,
+    fix_negative_altitudes,
+    fix_inverted_altitudes,
+    fix_altitudes_errors,
+    fix_depth_min,
+    fix_depth_max,
+    replace_code_dataset,
+    replace_code_module,
+    replace_code_source,
+    replace_code_nomenclature,
+    replace_code_digitiser,
+    replace_code_area,
+    replace_code_organism,
+    set_default_nomenclature_values,
+    replace_code_acquisition_framework,
+)
+
 
 # Define OS Environment variables
 root_dir = os.path.realpath(f"{os.path.dirname(os.path.abspath(__file__))}/../../")
@@ -18,11 +54,6 @@ os.environ["IMPORT_PARSER.PATHES.ROOT"] = root_dir
 os.environ["IMPORT_PARSER.PATHES.SHARED.CONFIG"] = config_shared_dir
 os.environ["IMPORT_PARSER.PATHES.APP"] = app_dir
 os.environ["IMPORT_PARSER.PATHES.APP.CONFIG"] = config_dir
-
-from gn2.db import GnDatabase
-from helpers.config import Config
-from helpers.helpers import print_msg, print_info, print_error, print_verbose, find_ranges
-from gn2.parser import *
 
 
 @click.command()
@@ -239,36 +270,36 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                             row = replace_empty_value(row)
 
                             # Check Sciname code
-                            if check_sciname_code(row, scinames_codes, reader, reports) == False:
+                            if check_sciname_code(row, scinames_codes, reader, reports) is False:
                                 write_row = False
                                 print_error(
                                     f"Line {reader.line_num} removed, sciname code {row['cd_nom']} not exists in TaxRef !"
                                 )
 
                             # Check date_min and date_max
-                            if check_dates(row, reader, reports) == False:
+                            if check_dates(row, reader, reports) is False:
                                 write_row = False
                                 print_error(
                                     f"Line {reader.line_num} removed, mandatory dates missing !"
                                 )
-                            elif check_date_max_greater_than_min(row, reader, reports) == False:
+                            elif check_date_max_greater_than_min(row, reader, reports) is False:
                                 write_row = False
                                 print_error(
                                     f"Line {reader.line_num} removed, date max not greater than date min !"
                                 )
-                            elif check_date_min_in_future(row, reader, reports) == False:
+                            elif check_date_min_in_future(row, reader, reports) is False:
                                 write_row = False
                                 print_error(
                                     f"Line {reader.line_num} removed, date min in the future !"
                                 )
-                            elif check_date_max_in_future(row, reader, reports) == False:
+                            elif check_date_max_in_future(row, reader, reports) is False:
                                 write_row = False
                                 print_error(
                                     f"Line {reader.line_num} removed, date max in the future !"
                                 )
 
                             # Fix altitudes
-                            if write_row != False:
+                            if write_row is not False:
                                 row = fix_altitude_min(row, reader, reports)
                                 row = fix_altitude_max(row, reader, reports)
                                 row = fix_negative_altitudes(row, reader, reports)
@@ -278,7 +309,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                                 row = fix_depth_max(row, reader, reports)
 
                             # Replace codes
-                            if write_row != False:
+                            if write_row is not False:
                                 # Replace Dataset Code
                                 row = replace_code_dataset(row, datasets, reader, reports)
                                 # Replace Module Code
@@ -306,7 +337,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                             )
 
                         # Write in destination file
-                        if write_row == True:
+                        if write_row is True:
                             writer.writerow(row)
 
                         # Update progressbar

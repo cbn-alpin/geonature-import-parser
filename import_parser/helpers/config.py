@@ -1,7 +1,7 @@
 import os
 import re
 import ast
-from configparser import ConfigParser, ExtendedInterpolation, NoOptionError
+from configparser import ConfigParser, NoOptionError
 
 
 class Config:
@@ -11,49 +11,57 @@ class Config:
 
     section_pattern = re.compile(r"(?:^[#;][^$]+$)*^\[[^]]+\]$", re.MULTILINE)
     initialized = False
-    default_section_name = 'DEFAULT'
+    default_section_name = "DEFAULT"
 
-    local_config_path = (os.path.join(os.environ['IMPORT_PARSER.PATHES.APP.CONFIG'], 'settings.ini'))
-    default_config_file_path = (os.path.join(os.environ['IMPORT_PARSER.PATHES.APP.CONFIG'], 'settings.default.ini'))
-    local_shared_config_file_path = (os.path.join(os.environ['IMPORT_PARSER.PATHES.SHARED.CONFIG'], 'settings.ini'))
-    default_shared_config_file_path = (os.path.join(os.environ['IMPORT_PARSER.PATHES.SHARED.CONFIG'], 'settings.default.ini'))
+    local_config_path = os.path.join(os.environ["IMPORT_PARSER.PATHES.APP.CONFIG"], "settings.ini")
+    default_config_file_path = os.path.join(
+        os.environ["IMPORT_PARSER.PATHES.APP.CONFIG"], "settings.default.ini"
+    )
+    local_shared_config_file_path = os.path.join(
+        os.environ["IMPORT_PARSER.PATHES.SHARED.CONFIG"], "settings.ini"
+    )
+    default_shared_config_file_path = os.path.join(
+        os.environ["IMPORT_PARSER.PATHES.SHARED.CONFIG"], "settings.default.ini"
+    )
 
-    nomenclatures_config_file_path = (os.path.join(os.environ['IMPORT_PARSER.PATHES.APP.CONFIG'], 'nomenclatures.ini'))
+    nomenclatures_config_file_path = os.path.join(
+        os.environ["IMPORT_PARSER.PATHES.APP.CONFIG"], "nomenclatures.ini"
+    )
 
     @classmethod
     def _initialize(cls):
-        """ Start config by reading all settings.ini files. """
-        cls.initialized = True # Must be in first place
+        """Start config by reading all settings.ini files."""
+        cls.initialized = True  # Must be in first place
         config_files = [
             cls.default_shared_config_file_path,
             cls.local_shared_config_file_path,
             cls.default_config_file_path,
-            cls.local_config_path
+            cls.local_config_path,
         ]
-        for cfg_file in config_files :
+        for cfg_file in config_files:
             cls.load(cfg_file)
 
         return cls
 
     @classmethod
     def _splitKey(cls, key):
-        splited_key = key.split('.')
-        if len(splited_key) == 1 :
+        splited_key = key.split(".")
+        if len(splited_key) == 1:
             section = cls.default_section_name
             option = key
-        elif len(splited_key) == 2 :
+        elif len(splited_key) == 2:
             section, option = map(str, splited_key)
-        elif len(splited_key) > 2 :
+        elif len(splited_key) > 2:
             section = splited_key[0]
-            option = '.'.join(splited_key[1:])
+            option = ".".join(splited_key[1:])
         return [section, option]
 
     @classmethod
     def _hasNeedToEval(cls, value):
         need_eval = False
-        if value.startswith('[') and value.endswith(']'):
+        if value.startswith("[") and value.endswith("]"):
             need_eval = True
-        elif value.startswith('{') and value.endswith('}'):
+        elif value.startswith("{") and value.endswith("}"):
             need_eval = True
         return need_eval
 
@@ -63,24 +71,23 @@ class Config:
             cls._initialize()
 
         try:
-            with open(path, 'r') as f:
+            with open(path, "r") as f:
                 text = f.read()
         except IOError:
             pass
         else:
-            if text != '' and cls.section_pattern.search(text) == None:
-                text = "["+ cls.default_section_name + "]\n" + text
+            if text != "" and cls.section_pattern.search(text) is None:
+                text = "[" + cls.default_section_name + "]\n" + text
             cls.configParser.read_string(text)
 
     @classmethod
     def has(cls, key):
-        """ Return True if key exists, else False. """
+        """Return True if key exists, else False."""
         if not cls.initialized:
             cls._initialize()
 
         section, option = map(str, cls._splitKey(key))
         return cls.configParser.has_option(section, option)
-
 
     @classmethod
     def get(cls, key):
@@ -109,9 +116,19 @@ class Config:
         # Make an eval of the value if value is surrounded by [] or {}
         if cls._hasNeedToEval(value):
             value = ast.literal_eval(value)
-        elif value.lower() in ['1', 'yes', 'true', 'on',]:
+        elif value.lower() in [
+            "1",
+            "yes",
+            "true",
+            "on",
+        ]:
             value = True
-        elif value.lower() in ['0', 'no', 'false', 'off',]:
+        elif value.lower() in [
+            "0",
+            "no",
+            "false",
+            "off",
+        ]:
             value = False
 
         return value

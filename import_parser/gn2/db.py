@@ -62,7 +62,7 @@ class GnDatabase:
 
     def get_all_modules(self):
         self.db_cursor.execute(
-            f"""
+            """
             SELECT module_code AS code, id_module AS id
             FROM gn_commons.t_modules
         """
@@ -75,7 +75,7 @@ class GnDatabase:
 
     def get_all_sources(self):
         self.db_cursor.execute(
-            f"""
+            """
             SELECT name_source AS code, id_source AS id
             FROM gn_synthese.t_sources
         """
@@ -88,12 +88,12 @@ class GnDatabase:
 
     def get_all_areas(self):
         self.db_cursor.execute(
-            f"""
-            SELECT 
+            """
+            SELECT
                 bib.type_code AS type,
                 la.id_area AS id,
                 la.area_code AS code
-            FROM ref_geo.bib_areas_types bib 
+            FROM ref_geo.bib_areas_types bib
             JOIN ref_geo.l_areas la ON la.id_type = bib.id_type
         """
         )
@@ -107,12 +107,9 @@ class GnDatabase:
     def get_all_nomenclatures(self):
         nomenclatures_columns_types = Config.getSection("NOMENCLATURES")
         types = list(nomenclatures_columns_types.values())
-        nomenclature_types_columns = {
-            value: key for key, value in nomenclatures_columns_types.items()
-        }
 
         self.db_cursor.execute(
-            f"""
+            """
             SELECT bnt.mnemonique AS type, tn.cd_nomenclature AS code, tn.id_nomenclature AS id
             FROM ref_nomenclatures.t_nomenclatures AS tn
                 INNER JOIN ref_nomenclatures.bib_nomenclatures_types AS bnt
@@ -131,7 +128,7 @@ class GnDatabase:
 
     def get_all_scinames_codes(self):
         self.db_cursor.execute(
-            f"""
+            """
             SELECT DISTINCT cd_nom AS code, lb_nom AS name
             FROM taxonomie.taxref
         """
@@ -162,7 +159,7 @@ class GnDatabase:
 
     def check_sciname_code(self, sciname_code):
         self.db_cursor.execute(
-            f"""
+            """
             SELECT t.cd_nom
             FROM taxonomie.taxref AS t
             WHERE cd_nom = %s
