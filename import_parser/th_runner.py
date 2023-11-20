@@ -124,7 +124,6 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
         quotechar='"',
         doublequote=True,
         quoting=csv.QUOTE_ALL,
-        escapechar='""',
         lineterminator="\r\n",
     )
     csv.register_dialect(
@@ -133,7 +132,6 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
         quotechar='"',
         doublequote=True,
         quoting=csv.QUOTE_MINIMAL,
-        escapechar='""',
         lineterminator="\n",
     )
     csv.register_dialect(
@@ -142,8 +140,6 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
         quotechar='"',
         doublequote=True,
         quoting=csv.QUOTE_MINIMAL,
-        # quoting=csv.QUOTE_NONE,
-        escapechar='""',
         lineterminator="\n",
     )
 
