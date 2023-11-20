@@ -7,6 +7,17 @@ import json
 
 import click
 
+# WARNING: must be define before import-parser Python imports
+# Define OS Environment variables
+root_dir = os.path.realpath(f"{os.path.dirname(os.path.abspath(__file__))}/../../")
+config_shared_dir = os.path.realpath(f"{root_dir}/shared/config/")
+app_dir = os.path.realpath(f"{os.path.dirname(os.path.abspath(__file__))}/../")
+config_dir = os.path.realpath(f"{app_dir}/config/")
+os.environ["IMPORT_PARSER.PATHES.ROOT"] = root_dir
+os.environ["IMPORT_PARSER.PATHES.SHARED.CONFIG"] = config_shared_dir
+os.environ["IMPORT_PARSER.PATHES.APP"] = app_dir
+os.environ["IMPORT_PARSER.PATHES.APP.CONFIG"] = config_dir
+
 from th.db import ThDatabase
 from helpers.config import Config
 from helpers.helpers import print_error
@@ -25,17 +36,6 @@ from th.parser import (
     check_taxon_code,
     replace_taxon_code,
 )
-
-
-# Define OS Environment variables
-root_dir = os.path.realpath(f"{os.path.dirname(os.path.abspath(__file__))}/../../")
-config_shared_dir = os.path.realpath(f"{root_dir}/shared/config/")
-app_dir = os.path.realpath(f"{os.path.dirname(os.path.abspath(__file__))}/../")
-config_dir = os.path.realpath(f"{app_dir}/config/")
-os.environ["IMPORT_PARSER.PATHES.ROOT"] = root_dir
-os.environ["IMPORT_PARSER.PATHES.SHARED.CONFIG"] = config_shared_dir
-os.environ["IMPORT_PARSER.PATHES.APP"] = app_dir
-os.environ["IMPORT_PARSER.PATHES.APP.CONFIG"] = config_dir
 
 
 @click.command()
