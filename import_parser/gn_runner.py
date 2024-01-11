@@ -75,6 +75,7 @@ from gn2.parser import (
         u (=user),
         tr (=taxref_rank),
         t (=taxref),
+        oc (=occtax),
     """,
 )
 @click.option(
@@ -378,6 +379,7 @@ def set_actions_type(abbr_type):
         "u": "USER",
         "tr": "TAXREF_RANK",
         "t": "TAXREF",
+        "oc": "OCCTAX",
     }
     if abbr_type in types:
         Config.setParameter("actions.type", types[abbr_type])
