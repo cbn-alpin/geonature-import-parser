@@ -175,7 +175,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
     )
 
     # Access to the database if necessary
-    db_access_need = set(["s", "u", "af", "d"])
+    db_access_need = set(["s", "oc", "u", "af", "d"])
     if import_type in db_access_need:
         db = GnDatabase()
         db.connect_to_database()
@@ -183,7 +183,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
         db.print_database_infos()
 
     # If necessary, get infos in the database
-    if import_type == "s":
+    if import_type == "s" or "oc":
         datasets = db.get_all_datasets()
         modules = db.get_all_modules()
         sources = db.get_all_sources()
@@ -259,7 +259,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                         # Maintain protected char
                         row = force_protected_char(row)
 
-                        if import_type == "s":
+                        if import_type == "s" or import_type == "oc":
                             # Add observation UUID
                             row = add_uuid_obs(row)
 
@@ -404,7 +404,7 @@ def define_current_actions():
 
 
 def load_nomenclatures():
-    nomenclatures_needed = set(["SYNTHESE", "ACQUISITION_FRAMEWORK", "DATASET"])
+    nomenclatures_needed = set(["SYNTHESE", "OCCTAX", "ACQUISITION_FRAMEWORK", "DATASET"])
     if Config.has("actions.type") and Config.get("actions.type") in nomenclatures_needed:
         Config.load(Config.nomenclatures_config_file_path)
 
