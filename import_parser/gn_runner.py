@@ -183,7 +183,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
         db.print_database_infos()
 
     # If necessary, get infos in the database
-    if import_type == "s" or "oc":
+    if import_type in ["s", "oc"]:
         datasets = db.get_all_datasets()
         modules = db.get_all_modules()
         sources = db.get_all_sources()
