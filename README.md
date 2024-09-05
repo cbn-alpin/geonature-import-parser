@@ -5,16 +5,10 @@ Script CLI Python 3 transformant [le format générique d'échange](https://wiki
 
 ## Mise en place
 
-- Mettre à jour les fichiers de configuration.
-- Installer Pipenv : ```pip3 install --user pipenv```
-- Ajouter le code suivant au fichier `~/.bashrc` :
-
-```
-# Add ~/.local/bin to PATH (Pipenv)
-if [ -d "${HOME}/.local/bin" ] ; then
-    PATH="${HOME}/.local/bin:$PATH"
-fi
-```
+-   Mettre à jour les fichiers de configuration.
+-   Installer pipx (si nécessaire) : `sudo apt install pipx`
+-   Activer Pipx dans l'environnement utilisateur : `pipx ensurepath ; source ~/.bashrc`
+-   Installer Pipenv : `pipx install pipenv`
 
 - Recharger le fichier `~/.bashrc` avec la commande : `source ~/.bashrc`
 - **Notes** : il est nécessaire de donner les droits d'execution à GCC pour 
