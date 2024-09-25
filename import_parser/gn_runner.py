@@ -31,6 +31,7 @@ from gn2.parser import (
     insert_values_to_columns,
     force_protected_char,
     add_uuid_obs,
+    add_uuid_cor_counting_occtax,
     replace_empty_value,
     check_sciname_code,
     check_dates,
@@ -260,6 +261,9 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                         row = force_protected_char(row)
 
                         if import_type == "s" or import_type == "oc":
+                            if import_type == "oc":
+                                # Add observation UUID
+                                row = add_uuid_cor_counting_occtax(row)
                             # Add observation UUID
                             row = add_uuid_obs(row)
 
