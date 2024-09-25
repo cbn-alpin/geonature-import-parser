@@ -172,6 +172,13 @@ def add_uuid_obs(row):
     return row
 
 
+def add_uuid_cor_counting_occtax(row):
+    if Config.get("actions.add_uuid_cor_counting_occtax"):
+        if not is_uuid(row["unique_id_sinp_occtax"]):
+            row["unique_id_sinp_occtax"] = uuid.uuid4()
+    return row
+
+
 def replace_empty_value(row):
     # Set NULL instead of empty value for optional fields with UUID, INT, JSON or DATE type.
     fields = [
