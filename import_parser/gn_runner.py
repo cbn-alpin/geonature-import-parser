@@ -19,6 +19,7 @@ os.environ["IMPORT_PARSER.PATHES.SHARED.CONFIG"] = config_shared_dir
 os.environ["IMPORT_PARSER.PATHES.APP"] = app_dir
 os.environ["IMPORT_PARSER.PATHES.APP.CONFIG"] = config_dir
 
+
 from gn2.db import GnDatabase
 from helpers.config import Config
 from helpers.helpers import print_error
@@ -199,6 +200,9 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
     elif import_type == "d":
         nomenclatures = db.get_all_nomenclatures()
         acquisition_frameworks = db.get_all_acquisition_frameworks()
+
+    if import_type in db_access_need:
+        db.close()
 
     # Open CSV files
     with open(filename_src, "r", newline="", encoding="utf-8") as f_src:

@@ -31,6 +31,10 @@ class GnDatabase:
         record = self.db_cursor.fetchone()
         print(f"You are connected to - {record}")
 
+    def close(self):
+        self.db_cursor.close()
+        self.db_connection.close()
+
     def get_dataset_id(self, code):
         self.db_cursor.execute(
             f"""
