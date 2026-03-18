@@ -78,6 +78,7 @@ from gn2.parser import (
         tr (=taxref_rank),
         t (=taxref),
         oc (=occtax),
+        v (=validation).
     """,
 )
 @click.option(
@@ -177,7 +178,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
     )
 
     # Access to the database if necessary
-    db_access_need = set(["s", "oc", "u", "af", "d"])
+    db_access_need = set(["s", "oc", "u", "af", "d", "v"])
     if import_type in db_access_need:
         db = GnDatabase()
         db.connect_to_database()
@@ -200,6 +201,8 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
     elif import_type == "d":
         nomenclatures = db.get_all_nomenclatures()
         acquisition_frameworks = db.get_all_acquisition_frameworks()
+    elif import_type == "v":
+        nomenclatures = db.get_all_nomenclatures()
 
     if import_type in db_access_need:
         db.close()
@@ -307,7 +310,8 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                             if write_row is not False:
                                 row = fix_altitude_min(row, reader, reports)
                                 row = fix_altitude_max(row, reader, reports)
-                                row = fix_negative_altitudes(row, reader, reports)
+                                # TODO: replace fix_negative_altitudes by a check and not a fix
+                                #row = fix_negative_altitudes(row, reader, reports)
                                 row = fix_inverted_altitudes(row, reader, reports)
                                 row = fix_altitudes_errors(row, reader, reports)
                                 row = fix_depth_min(row, reader, reports)
@@ -315,31 +319,24 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
 
                             # Replace codes
                             if write_row is not False:
-                                # Replace Dataset Code
                                 row = replace_code_dataset(row, datasets, reader, reports)
-                                # Replace Module Code
                                 row = replace_code_module(row, modules)
-                                # Replace Source Code
                                 row = replace_code_source(row, sources, reader, reports)
-                                # Replace Nomenclatures Codes
                                 row = replace_code_nomenclature(row, nomenclatures, reader, reports)
-                                # Replace Digitiser Code
                                 row = replace_code_digitiser(row, users, reader, reports)
-                                # Replace Area Code
                                 row = replace_code_area(row, areas, reader, reports)
                         elif import_type == "u":
-                            # Replace Organism Code
                             row = replace_code_organism(row, organisms, reader, reports)
                         elif import_type == "af":
-                            # Replace Nomenclatures Codes
                             row = replace_code_nomenclature(row, nomenclatures, reader, reports)
                         elif import_type == "d":
-                            # Replace Nomenclatures Codes
                             row = set_default_nomenclature_values(row)
                             row = replace_code_nomenclature(row, nomenclatures, reader, reports)
                             row = replace_code_acquisition_framework(
                                 row, acquisition_frameworks, reader, reports
                             )
+                        elif import_type == "v":
+                            row = replace_code_nomenclature(row, nomenclatures, reader, reports)
 
                         # Write in destination file
                         if write_row is True:
@@ -388,6 +385,7 @@ def set_actions_type(abbr_type):
         "tr": "TAXREF_RANK",
         "t": "TAXREF",
         "oc": "OCCTAX",
+        "v": "VALIDATION",
     }
     if abbr_type in types:
         Config.setParameter("actions.type", types[abbr_type])
@@ -412,7 +410,7 @@ def define_current_actions():
 
 
 def load_nomenclatures():
-    nomenclatures_needed = set(["SYNTHESE", "OCCTAX", "ACQUISITION_FRAMEWORK", "DATASET"])
+    nomenclatures_needed = set(["SYNTHESE", "OCCTAX", "ACQUISITION_FRAMEWORK", "DATASET", "VALIDATION"])
     if Config.has("actions.type") and Config.get("actions.type") in nomenclatures_needed:
         Config.load(Config.nomenclatures_config_file_path)
 
