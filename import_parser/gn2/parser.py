@@ -510,6 +510,11 @@ def replace_code_area(row, areas, reader, reports):
             row["code_nomenclature_info_geo_type"] = Config.get("null_value_string")
     return row
 
+def set_default_description(row):
+    if "desc" in row.keys() and is_empty_or_null(row["desc"]):
+        if "name" in row.keys() and not is_empty_or_null(row["name"]):
+            row["desc"] = f"{row["name"]}."
+    return row
 
 def set_default_nomenclature_values(row):
     default_values = Config.getSection("NOMENCLATURES_DEFAULT_VALUE")

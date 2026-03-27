@@ -53,6 +53,7 @@ from gn2.parser import (
     replace_code_digitiser,
     replace_code_area,
     replace_code_organism,
+    set_default_description,
     set_default_nomenclature_values,
     replace_code_acquisition_framework,
 )
@@ -329,12 +330,14 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                             row = replace_code_organism(row, organisms, reader, reports)
                         elif import_type == "af":
                             row = replace_code_nomenclature(row, nomenclatures, reader, reports)
+                            row = set_default_description(row)
                         elif import_type == "d":
                             row = set_default_nomenclature_values(row)
                             row = replace_code_nomenclature(row, nomenclatures, reader, reports)
                             row = replace_code_acquisition_framework(
                                 row, acquisition_frameworks, reader, reports
                             )
+                            row = set_default_description(row)
                         elif import_type == "v":
                             row = replace_code_nomenclature(row, nomenclatures, reader, reports)
 
