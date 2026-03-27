@@ -100,7 +100,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
     """
     GeoNature 2 Import Parser
 
-    This script parse files containing Postregsql \copy data before integrate
+    This script parse files containing Postregsql data before integrate
     their in GeoNature 2 database.
     To avoid to use integer identifiers in import files we use alphanumeric value
     (code or uuid) for nomenclature, dataset,organisms or users linked data.

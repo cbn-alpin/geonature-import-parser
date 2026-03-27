@@ -604,7 +604,7 @@ def replace_code_digitiser(row, users, reader, reports):
             report_value = get_report_field_value(row, reader)
             msg = [
                 f"WARNING ({report_value}): digitiser (=> user) code missing !",
-                f"\Digitiser code: {code}",
+                f"\tDigitiser code: {code}",
                 "\tSet to null value string !",
             ]
             print_error("\n".join(msg))
