@@ -58,12 +58,18 @@ def check_taxon_code(row, taxons_codes):
     return exists
 
 
-def replace_taxon_code(row, scinames_codes):
+def replace_taxon_code(row, scinames_codes, reader):
     exists = False
     if row["cd_ref"] is not None and row["cd_ref"] != Config.get("null_value_string"):
         exists = str(row["cd_ref"]) in scinames_codes
     if exists:
         row["cd_ref"] = scinames_codes[row["cd_ref"]]
+
+    if exists is False:
+        print_error(
+            f"Line {reader.line_num} removed ! Taxon or sciname code {row['cd_ref']} not exists in TaxRef !"
+        )
+    return (exists, row)
 
 def replace_code_type(row, reader):
     exists = False

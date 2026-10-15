@@ -157,6 +157,8 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
         themes = db.get_all_themes()
     elif import_type == "t":
         attributes = db.get_all_attributes()
+        taxons_codes = db.get_all_taxons_codes()
+        scinames_codes = db.get_all_scinames_codes()
     elif import_type == "m":
         taxons_codes = db.get_all_taxons_codes()
         scinames_codes = db.get_all_scinames_codes()
@@ -201,10 +203,17 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                         # Write in destination file
                         writer.writerow(row)
                     elif import_type == "t":
-                        # Flip attribute from column to line
-                        for new_row in flip_text_row(row, attributes):
-                            # Write in destination file
-                            writer.writerow(new_row)
+                        ok = check_taxon_code(row, taxons_codes)
+                        if ok is False:
+                            print_error(
+                                f"Line {reader.line_num}: taxon code {row['cd_ref']} not exists ! Trying to find a cd_ref by using cd_nom in TaxRef !"
+                            )
+                            (ok, row) = replace_taxon_code(row, scinames_codes, reader)
+                        if ok is True:
+                            # Flip attribute from column to line
+                            for new_row in flip_text_row(row, attributes):
+                                # Write in destination file
+                                writer.writerow(new_row)
                     elif import_type == "m":
                         (ok, row) = replace_code_type(row, reader)
                         # Check Taxon code (=cd_ref)
@@ -212,14 +221,9 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                             print_error(
                                 f"Line {reader.line_num}: taxon code {row['cd_ref']} not exists ! Trying to find a cd_ref by using cd_nom in TaxRef !"
                             )
-                            (exists, row) = replace_taxon_code(row, scinames_codes)
-                            if exists is False:
-                                print_error(
-                                    f"Line {reader.line_num} removed ! Taxon or sciname code {row['cd_ref']} not exists in TaxRef !"
-                                )
-                            else:
-                                writer.writerow(row)
-                        else:
+                            (ok, row) = replace_taxon_code(row, scinames_codes, reader)
+
+                        if ok is True:
                             writer.writerow(row)
                     else:
                         writer.writerow(row)
