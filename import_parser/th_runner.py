@@ -73,7 +73,7 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
     """
     TaxHub Import Parser
 
-    This script parse files containing Postregsql \copy data before integrate
+    This script parse files containing Postregsql \\copy data before integrate
     their in TaxHub database.
     To avoid to use integer identifiers in import files we use alphanumeric value
     (code) for theme and attributes linked data.

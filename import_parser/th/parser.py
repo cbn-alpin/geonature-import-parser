@@ -1,3 +1,4 @@
+import sys
 from helpers.config import Config
 from helpers.helpers import print_error, is_empty_or_null
 from gn2.parser import get_report_field_value
@@ -9,16 +10,16 @@ def check_attributes_headers(attributes, fieldnames):
         if fieldname != "cd_ref" and fieldname not in attributes:
             msg = [
                 f"WARNING ({fieldname}): attribute code missing !",
-                f"\Attribute code: {fieldname}",
+                f"\tAttribute code: {fieldname}",
                 "\tExit !",
             ]
             print_error("\n".join(msg))
-            exit()
+            sys.exit()
     return exists
 
 
 def replace_code_theme(row, themes, reader):
-    if "theme_code" in row.keys() and not is_empty_or_null(row["theme_code"]):
+    if "theme_code" in row and not is_empty_or_null(row["theme_code"]):
         code = row["theme_code"]
         try:
             if themes[code]:
@@ -27,7 +28,7 @@ def replace_code_theme(row, themes, reader):
             report_value = get_report_field_value(row, reader)
             msg = [
                 f"WARNING ({report_value}): theme code missing !",
-                f"\Theme code: {code}",
+                f"\tTheme code: {code}",
                 "\tSet to null value string !",
             ]
             print_error("\n".join(msg))
@@ -37,7 +38,7 @@ def replace_code_theme(row, themes, reader):
 
 def flip_text_row(row, attributes):
     new_rows = []
-    for fieldname in row.keys():
+    for fieldname in row:
         value = row[fieldname]
         if not is_empty_or_null(value) and fieldname != "cd_ref":
             new_rows.append(
@@ -53,14 +54,14 @@ def flip_text_row(row, attributes):
 def check_taxon_code(row, taxons_codes):
     exists = False
     if row["cd_ref"] is not None and row["cd_ref"] != Config.get("null_value_string"):
-        exists = str(row["cd_ref"]) in taxons_codes.keys()
+        exists = str(row["cd_ref"]) in taxons_codes
     return exists
 
 
 def replace_taxon_code(row, scinames_codes):
     exists = False
     if row["cd_ref"] is not None and row["cd_ref"] != Config.get("null_value_string"):
-        exists = str(row["cd_ref"]) in scinames_codes.keys()
+        exists = str(row["cd_ref"]) in scinames_codes
     if exists:
         row["cd_ref"] = scinames_codes[row["cd_ref"]]
     return (exists, row)
