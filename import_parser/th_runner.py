@@ -35,6 +35,7 @@ from th.parser import (
     flip_text_row,
     check_taxon_code,
     replace_taxon_code,
+    replace_code_type,
 )
 
 
@@ -205,8 +206,9 @@ def parse_file(filename, import_type, actions_config_file, report_dir):
                             # Write in destination file
                             writer.writerow(new_row)
                     elif import_type == "m":
+                        (ok, row) = replace_code_type(row, reader)
                         # Check Taxon code (=cd_ref)
-                        if check_taxon_code(row, taxons_codes) is False:
+                        if ok is True and check_taxon_code(row, taxons_codes) is False:
                             print_error(
                                 f"Line {reader.line_num}: taxon code {row['cd_ref']} not exists ! Trying to find a cd_ref by using cd_nom in TaxRef !"
                             )

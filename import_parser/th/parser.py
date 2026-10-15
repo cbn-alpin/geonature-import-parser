@@ -64,4 +64,20 @@ def replace_taxon_code(row, scinames_codes):
         exists = str(row["cd_ref"]) in scinames_codes
     if exists:
         row["cd_ref"] = scinames_codes[row["cd_ref"]]
+
+def replace_code_type(row, reader):
+    exists = False
+    if "type" in row and not is_empty_or_null(row["type"]):
+        code = row["type"]
+        try:
+            if Config.get("media_types")[code]:
+                row["type"] = Config.get("media_types")[code]
+                exists = True
+        except KeyError:
+            report_value = get_report_field_value(row, reader)
+            msg = [
+                f"WARNING ({report_value}): media type code missing !",
+                f"\tLine {reader.line_num} removed ! Media type code {code} not exists !",
+            ]
+            print_error("\n".join(msg))
     return (exists, row)
